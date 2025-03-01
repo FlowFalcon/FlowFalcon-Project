@@ -10,7 +10,7 @@ FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbag
 # ⚠️ Registration is required 
 
 ## *Untuk menggunakan script ini, kamu harus daftar dulu di grup secara gratis**  
-## 🔹 **Group Room Chat:** [Klik Disini](https://chat.whatsapp.com/DBplvblerPL9ieFFcmofqq)  
+## 🔹 **Group Room Chat:** [Klik Disini](https://chat.whatsapp.com/DBplvblerPL9ieFFcmofqq) 
 
 ---
 
