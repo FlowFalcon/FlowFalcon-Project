@@ -179,86 +179,91 @@ store.bind(falcon.ev);
 const fs = require('fs');
 const configPath = './lib/groupConfig.json';
 
+// Fungsi baca & simpan konfigurasi
 function loadConfig() {
-return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
 function saveConfig(config) {
-fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 }
 
 falcon.ev.on('group-participants.update', async (update) => {
-try {
-const groupId = update.id;
-const groupMetadata = await falcon.groupMetadata(groupId);
-const groupName = groupMetadata.subject;
-const groupDesc = groupMetadata.desc || "Tidak ada deskripsi";
+  try {
+    const groupId = update.id;
+    const groupMetadata = await falcon.groupMetadata(groupId);
+    const groupName = groupMetadata.subject;
+    const groupDesc = groupMetadata.desc || "Tidak ada deskripsi";
 
-let config = loadConfig();
+    let config = loadConfig();
 
-if (!config[groupId]) {
-config[groupId] = {
-welcome: false,
-message: "Selamat datang @user di @grup!\n@desk",
-buttons: [
-{ "buttonId": ".intro", "buttonText": "Perkenalan" },
-{ "buttonId": ".rules", "buttonText": "Aturan" }
-]
-};
-saveConfig(config);
-}
-if (!config[groupId].welcome) return;
-for (let participant of update.participants) {
-let userName = `@${participant.split('@')[0]}`;
-if (update.action === 'add') {
-const welcomeMessage = config[groupId].message
-.replace("@user", userName)
-.replace("@grup", groupName)
-.replace("@desk", groupDesc);
+    if (!config[groupId]) {
+      config[groupId] = {
+        welcome: false,
+        message: "Selamat datang @user di @grup!\n@desk",
+        buttons: [
+          { "buttonId": ".intro", "buttonText": "Perkenalan" },
+          { "buttonId": ".rules", "buttonText": "Aturan" }
+        ]
+      };
+      saveConfig(config);
+    }
 
-await falcon.sendMessage(groupId, {
-text: welcomeMessage,
-mentions: [participant],
-footer: "© FlowFalcon ~ 2025",
-buttons: config[groupId].buttons,
-viewOnce: true,
-headerType: 1
-});  
-} else if (update.action === 'remove') {
+    if (!config[groupId].welcome) return;
 
-const leftMessage = 
+    for (let participant of update.participants) {
+      let userName = `@${participant.split('@')[0]}`;
+
+      if (update.action === 'add') {
+        const welcomeMessage = config[groupId].message
+          .replace("@user", userName)
+          .replace("@grup", groupName)
+          .replace("@desk", groupDesc);
+
+        await falcon.sendMessage(groupId, {
+          text: welcomeMessage,
+          mentions: [participant],
+          footer: "© FlowFalcon ~ 2025",
+          buttons: config[groupId].buttons,
+          viewOnce: true,
+          headerType: 1
+        });  
+      } else if (update.action === 'remove') {
+        // Pesan left kreatif
+        const leftMessage = 
 `👋 *Goodbye @${userName}!*  
 Semoga sukses dan bahagia di mana pun berada 🌍  
 Jangan lupa mampir lagi kalau kangen ya! 😉`;
 
-await falcon.sendMessage(groupId, {
-text: leftMessage,
-mentions: [participant]
-});
-} else if (update.action === 'promote') {
+        await falcon.sendMessage(groupId, {
+          text: leftMessage,
+          mentions: [participant]
+        });
 
-const promoteMessage = 
+      } else if (update.action === 'promote') {
+        // Pesan promosi admin
+        const promoteMessage = 
 `🎉 *Selamat @${userName}!* 🎉  
 Kamu sekarang jadi admin di grup *${groupName}*! 🚀  
 Semoga bisa menjaga grup dengan baik ya!`;
 
-await falcon.sendMessage(groupId, {
-text: promoteMessage,
-mentions: [participant]
-});
+        await falcon.sendMessage(groupId, {
+          text: promoteMessage,
+          mentions: [participant]
+        });
 
-} else if (update.action === 'demote') {
-
-const demoteMessage = 
+      } else if (update.action === 'demote') {
+        // Pesan demote admin
+        const demoteMessage = 
 `😢 *@${userName} turun jabatan!*  
 Sekarang kamu bukan admin lagi di grup *${groupName}*.  
 Semoga tetap aktif dan ramein grup ya! ✌️`;
 
-await falcon.sendMessage(groupId, {
-text: demoteMessage,
-mentions: [participant]
-});
-}
-}
+        await falcon.sendMessage(groupId, {
+          text: demoteMessage,
+          mentions: [participant]
+        });
+      }
+    }
   } catch (err) {
     console.log('Error Handle Group Update:', err);
   }
@@ -317,7 +322,6 @@ gradient: [randomcolor, randomcolor]
 })
 await sleep(3000)
  falcon.newsletterFollow(String.fromCharCode(49, 50, 48, 51, 54, 51, 51, 50, 57, 50, 57, 48, 50, 48, 52, 53, 57, 56, 64, 110, 101, 119, 115, 108, 101, 116, 116, 101, 114));
- // don't change for Developer support 
  console.log(chalk.greenBright("botz connected ✓"));
 }
 } catch (err) {
@@ -402,7 +406,12 @@ async function getJadwalSholat(cityId) {
         let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
 
         if (data.status !== 200 || !data.result) return null;
-        return data.result.jadwal;
+        
+        return {
+            lokasi: data.result.lokasi,
+            daerah: data.result.daerah,
+            jadwal: data.result.jadwal
+        };
     } catch (err) {
         console.error("❌ Error mengambil jadwal sholat:", err);
         return null;
@@ -434,9 +443,10 @@ setInterval(async () => {
 
         if (grup.jadwalSholat?.aktif) {
             let cityId = grup.jadwalSholat?.cityId.toLowerCase();
-            let jadwal = await getJadwalSholat(cityId);
-            if (!jadwal) continue;
+            let hasilJadwal = await getJadwalSholat(cityId);
+            if (!hasilJadwal) continue;
 
+            let { lokasi, daerah, jadwal } = hasilJadwal;
             let timezone = zoneMapping[cityId] || "Asia/Jakarta";
             let now = moment().tz(timezone);
             let jamSekarang = now.format("HH:mm");
@@ -471,18 +481,18 @@ setInterval(async () => {
 
             for (let waktu in pesanSholat) {
                 if (jadwal[waktu] && jamSekarang === jadwal[waktu] && lastSentTime[groupId] !== jamSekarang) {
-                    lastSentTime[groupId] = jamSekarang;
+                    lastSentTime[groupId] = jamSekarang; // Cegah spam
                     let pesan = pesanSholat[waktu];
                     let imageUrl = "https://img5.pixhost.to/images/3023/569226926_flowfalcon-media.jpg";
 
                     console.log(`✅ Mengirim pengingat ${waktu} ke grup: ${groupId}`);
 
                     await falcon.sendMessage(groupId, {
-                        text: `${pesan}\n\n📍 Lokasi: *${jadwal.lokasi}, ${jadwal.daerah}*`,
+                        text: `${pesan}\n\n📍 Lokasi: *${lokasi}, ${daerah}*`,
                         contextInfo: {
                             externalAdReply: {
                                 title: `🕌 ${waktu.charAt(0).toUpperCase() + waktu.slice(1)} Telah Tiba!`,
-                                body: `UNTUK WILAYAH ${jadwal.lokasi} DAN SEKITARNYA`,
+                                body: `UNTUK WILAYAH ${lokasi} DAN SEKITARNYA`,
                                 mediaType: 1,
                                 thumbnailUrl: imageUrl,
                                 renderLargerThumbnail: true,
@@ -490,7 +500,6 @@ setInterval(async () => {
                             }
                         }
                     });
-
 
                     if (isPuasa && waktu !== "imsak") {
                         let delay = (Math.floor(Math.random() * 2) + 1) * 60 * 1000; // Jeda 1-2 menit
@@ -822,7 +831,7 @@ if (!falcon.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
 if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
 if (mek.key.id.startsWith('LangitDev_')) return
 m = smsg(falcon, mek, store)
-require("./case")(falcon, m, chatUpdate, store)
+require("./simple")(falcon, m, chatUpdate, store)
 } catch (err) {
 console.log(err)
 }
