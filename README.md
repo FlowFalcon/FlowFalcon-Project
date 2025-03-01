@@ -91,11 +91,11 @@ global.prefix = ['!', '.', '/'] // Prefix command
 
 ## 🎖️ Thanks To  
 
-💙 **Afgan** – Pemilik Base Ori  
-💙 **AlwaysRicky** – Kontributor Fitur  
-💙 **Fathur** – Pengembang Tambahan  
-💙 **Alfi Dev** – Penyedia API
-💙 **My Followers** – Supporter For Me 
-💙 **AI** – Error Debugging  
-
+💙 **Afgan** – Pemilik Base Ori   
+💙 **AlwaysRicky** – Kontributor Fitur   
+💙 **Fathur** – Pengembang Tambahan   
+💙 **Alfi Dev** – Penyedia API   
+💙 **My Followers** – Supporter For Me  
+💙 **AI** – Error Debugging    
+ 
 ---
