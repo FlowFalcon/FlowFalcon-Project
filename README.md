@@ -1,6 +1,6 @@
 # FlowFalcon Project  
 
-![FlowFalcon Profile Card](https://cardivo.vercel.app/api?name=FlowFalcon~Project&description=Bot%20WhatsApp%20multi-fungsi%20dengan%20fitur%20menarik!%20🚀&image=https://img12.pixhost.to/images/600/571754322_flowfalcon-media.jpg&backgroundColor=%ffffff00&github=FlowFalcon&pattern=topography&colorPattern=%23eaeaea&animation=true)
+![FlowFalcon Profile Card](https://cardivo.vercel.app/api?name=FlowFalcon~Project&description=Bot%20WhatsApp%20multi-fungsi%20dengan%20fitur%20menarik!%20🚀&image=https://img12.pixhost.to/images/600/571754322_flowfalcon-media.jpg&backgroundColor=%23ecf0f1&github=FlowFalcon&pattern=topography&colorPattern=%23eaeaea&animation=true)
 
 FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbagai fitur keren buat memudahkan hidup lo!  
 
