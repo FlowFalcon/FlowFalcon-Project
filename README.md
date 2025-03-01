@@ -79,7 +79,7 @@ global.prefix = ['!', '.', '/'] // Prefix command
 ### 🎭 **Fun Menu**  
 - `tourl <media>` - Upload file ke URL  
 - `carigc <query>` - Cari grup WhatsApp  
-- `pixiv <query>` - Cari gambar di Pixiv  
+- `pixiv <query>` - Cari gambar di Pixiv 
 
 ### 🤖 **AI Menu**  
 - `autoai on/off/reset` - Chat dengan AI secara otomatis
