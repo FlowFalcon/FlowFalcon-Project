@@ -45,7 +45,7 @@ const ytdl = require('@vreden/youtube_scraper')
 const yts = require("yt-search")
 const { validateUser, registerUser } = require('flowfalcon-security');
 const { promisify } = require('util');
-const getFileSize = promisify(fs.stat); tgl
+const getFileSize = promisify(fs.stat);
 const https = require('https');
 //==================================================//
 module.exports = falcon = async (falcon, m, chatUpdate, mek, store) => {
