@@ -2108,7 +2108,6 @@ case 'ytv': {
     }  
 }   
 break;
-}  
 case 'tiktok':
 case 'ttdl':
 case 'tt': {
