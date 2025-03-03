@@ -667,13 +667,21 @@ function ensureGroupConfig(groupId) {
   if (!config[groupId]) {
     config[groupId] = {
       welcome: false,
-      message: "Selamat datang @user di @grup!\n@desk",
+      message: "Selamat datang @user di @grup!\n\n@desk",
       buttons: [
         { "buttonId": ".intro", "buttonText": "Perkenalan" },
         { "buttonId": ".rules", "buttonText": "Aturan" }
       ],
       rules: "📌 Tidak ada peraturan yang ditetapkan!",
-      intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:"
+      intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:",
+
+      jadwalSholat: {
+        aktif: false,
+        cityId: "",
+      },
+      jadwalPuasa: {
+        aktif: false
+      }
     };
     saveConfig(config);
   }
@@ -886,6 +894,7 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}autotyping
 ▢ ${prefix}antispam
 ▢ ${prefix}reset
+▢ ${prefix}update
 
 - 𝗦𝗧𝗜𝗖𝗞𝗘𝗥
 ▢ ${prefix}brat
@@ -1884,9 +1893,8 @@ Pergi dan ambil air wudhu lalu sholatlah🕌
 
 🌙 *Pengaturan Pengingat Puasa*  
 Gunakan perintah ini:  
-- \`.setpuasa [nama kota]\` ➝ Aktifkan pengingat sahur & buka puasa  
-  🔹 *Contoh:* \`.setpuasa Jakarta\`  
-- \`.matikanpuasa\` ➝ Matikan pengingat puasa  
+- \`.setpuasa on / off\` ➝ Aktifkan pengingat sahur & buka puasa  
+  🔹 *Contoh:* \`.setpuasa on\`  
 
 ⚡ *Format Notifikasi Puasa:*  
 📢 *Saat Sahur & Buka Puasa:*  
@@ -1950,6 +1958,10 @@ case 'setpuasa': {
 
     let config = loadConfig();
     if (!config[m.chat]) ensureGroupConfig(m.chat);
+
+    if (!config[m.chat].jadwalPuasa) {
+        config[m.chat].jadwalPuasa = { aktif: false };
+    }
 
     let status = args[0] === "on";
     config[m.chat].jadwalPuasa.aktif = status;
@@ -3472,6 +3484,40 @@ case "cadmin-v2": {
   m.reply(`Berhasil menghapus server panel *${capital(nameSrv)}*`)
   }
   break
+ 
+ //========================================// 
+case "update": {
+if (!isOwner) return m.reply("❌ Lu bukan owner!");
+if (!args[0]) return m.reply("⚠️ Masukin link raw file yang mau diupdate!");
+const fs = require("fs");
+const fetch = require("node-fetch");
+let updatedFiles = [];
+const updateFile = async (url) => {
+try {
+let splitUrl = url.split("/main/"); 
+if (splitUrl.length < 2) throw new Error("Format URL salah!");
+let path = splitUrl[1];
+if (!path) throw new Error("Path file tidak ditemukan!");
+let res = await fetch(url);if (!res.ok) throw new Error("Gagal fetch file!");
+let fileData = await res.text();
+fs.writeFileSync(`./${path}`, fileData);
+updatedFiles.push(`🗃️ Updated: ./${path}`);
+} catch (err) {
+updatedFiles.push(`❌ Error: ${err.message}`);
+}
+};
+
+(async () => {
+await Promise.all(args.map(updateFile));
+m.reply(`🔄 **UPDATE SELESAI!**\n\n${updatedFiles.join("\n")}\n\n⏳ Restarting bot...`);
+
+setTimeout(() => {
+process.exit(1);
+}, 3000);
+})();
+}
+break;
+
 //==================================================//
 default:
 if (budy.startsWith('=>')) {

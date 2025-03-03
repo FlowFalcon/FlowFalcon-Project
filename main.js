@@ -146,7 +146,7 @@ say(`Hello There Welcome To My Script
 ===========================================
    • Script     : FlowFalcon~Project
    • Developer : FlowFalcon 
-   • Version   : 3.0.0
+   • Version   : 3.2
    • Type      : Free
 ===========================================
 Script ini gratis dan bisa di dapatkan 
@@ -309,9 +309,9 @@ if (update.connection == "open" || update.receivedPendingNotifications == "true"
 console.clear()
 say(`Hello There Welcome To My Script
 ===========================================
-   • Script     : FlowFalcon~Project
+   • Script    : FlowFalcon~Project
    • Developer : FlowFalcon 
-   • Version   : 3.0.0
+   • Version   : 3.2
    • Type      : Free
 ===========================================
 Script ini gratis dan bisa di dapatkan 
@@ -829,9 +829,9 @@ mek.message = (Object.keys(mek.message)[0] === 'ephemeralMessage') ? mek.message
 if (mek.key && mek.key.remoteJid === 'status@broadcast') return
 if (!falcon.public && !mek.key.fromMe && chatUpdate.type === 'notify') return
 if (mek.key.id.startsWith('BAE5') && mek.key.id.length === 16) return
-if (mek.key.id.startsWith('LangitDev_')) return
+if (mek.key.id.startsWith('FlowFalcon_')) return
 m = smsg(falcon, mek, store)
-require("./simple")(falcon, m, chatUpdate, store)
+require("./case")(falcon, m, chatUpdate, store)
 } catch (err) {
 console.log(err)
 }
