@@ -1,6 +1,6 @@
 {
 "name": "FlowFalcon-Project",
-"version": "3.0.0",
+"version": "3.2.0",
 "description": "WhatsApp Bot By FlowFalcon",
 "main": "main.js",
 "type": "commonjs",
@@ -25,7 +25,7 @@
 "@hapi/boom": "^10.0.0",
 "@vreden/youtube_scraper":"^1.2.3",
 "@whiskeysockets/baileys": "github:AfganOFC/Bail",
-"flowfalcon-security":"2.0.2",
+"flowfalcon-security":"2.1.1",
 "awesome-phonenumber": "^4.4.0",
 "axios": "^0.24.0",
 "btch-downloader": "2.8.4",
@@ -62,7 +62,7 @@
 "yargs": "^17.6.2",
 "youtube-yts": "^2.0.0",
 "yt-search": "^2.10.4",
-"hybrid-ytdl":"1.2.0",
+"hybrid-ytdl":"1.2.3",
 "pdfkit":"latest",
 "node-gtts":"^2.0.2"
 }

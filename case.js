@@ -893,8 +893,8 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}autoread
 ▢ ${prefix}autotyping
 ▢ ${prefix}antispam
-▢ ${prefix}reset
 ▢ ${prefix}update
+▢ ${prefix}reset
 
 - 𝗦𝗧𝗜𝗖𝗞𝗘𝗥
 ▢ ${prefix}brat
@@ -924,12 +924,14 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}ytmp3
 ▢ ${prefix}ytmp4
 ▢ ${prefix}nhentaidl
+▢ ${prefix}spotifydl
 
 - 𝗣𝗟𝗔𝗬
 ▢ ${prefix}spotify
 ▢ ${prefix}play
 ▢ ${prefix}ytplay
 ▢ ${prefix}yts
+▢ ${prefix}spotifysearch
 
 - 𝗙𝗨𝗡
 ▢ ${prefix}afk
@@ -941,9 +943,16 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}nurl2
 ▢ ${prefix}ping
 ▢ ${prefix}cekidch
+▢ ${prefix}cekidgc
+▢ ${prefix}whatanime
 
 - 𝗔𝗜
 ▢ ${prefix}autoai
+
+- 𝗜𝗦𝗟𝗔𝗠𝗜𝗖 𝗠𝗘𝗡𝗨
+▢ ${prefix}surah
+▢ ${prefix}playsurah
+▢ ${prefix}ayat
 
 - 𝗖𝗣𝗔𝗡𝗘𝗟
 ▢ ${prefix}buatpanel
@@ -1492,7 +1501,7 @@ case "brat-animated":
 case "bratvid": { 
     if (!text) return m.reply('teksnya harus diisi!');
     
-    let res = await fetch(`https://brat.caliphdev.com/api/brat/animate?text=${text}`);
+    let res = await fetch(`https://brat.zellray.my.id/animate?text=${text}`);
     if (!res.ok) return m.reply('API Error: ' + res.statusText);
     
     // Perbaikan dengan arrayBuffer
@@ -2107,9 +2116,10 @@ case 'ytv': {
         let captionMedia = `📹 *${info.title}*\n👤 *${info.creator}*\n📡 *Sumber:* ${video.source}`;
 
         await falcon.sendMessage(m.chat, { 
-            [fileSize > 15 * 1024 * 1024 ? "document" : "video"]: { url: video.downloadUrl },
-            caption: captionMedia,
-            fileName: `${info.title}.mp4`
+            [fileSize > 15 * 1024 * 1024 ? "document" : "audio"]: { url: video.downloadUrl },
+            mimetype: 'video/mp4',
+            fileName: `${info.title}.mp3`,
+            caption: captionMedia
         }, { quoted: m });
 
         await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
@@ -2478,6 +2488,128 @@ case "yts": {
     falcon.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
 }
 break;
+case 'spotifydl': {
+    if (!text) return m.reply(`Silahkan berikan link, Contoh: ${prefix + command} https://open.spotify.com/track/2ROE7pfI8Monc5n13T3Tmt`);
+
+    const spotifyLink = text.trim();
+
+    try {
+        const metaResponse = await axios.get(`http://kinchan.sytes.net/spotify/meta?url=${encodeURIComponent(spotifyLink)}`);
+        const metadata = metaResponse.data.data;
+
+        if (!metadata.title || !metadata.artists) {
+            return reply('❌ Gagal mengambil metadata, pastikan link benar');
+        }
+
+     m.reply(`*乂 SPOTIFY - DOWNLOADER*\n\n` +
+            `🎶 *Judul:* ${metadata.title}\n` +
+            `🎤 *Artis:* ${metadata.artists}\n` +
+            `💿 *Album:* ${metadata.album}\n` +
+            `⏳ *Duration:* ${Math.floor(metadata.duration / 60000)}:${((metadata.duration % 60000) / 1000).toFixed(0).padStart(2, '0')} menit\n` +
+            `📅 *Release:* ${metadata.release_date}\n\n` +
+            `> audio sedang di proses, silahkan tunggu sebentar...`);
+
+        const downloadResponse = await axios.get(`http://kinchan.sytes.net/spotify/downloader?track=${encodeURIComponent(spotifyLink)}&title=${encodeURIComponent(metadata.title)}&artist=${encodeURIComponent(metadata.artists)}`);
+        const downloader = downloadResponse.data;
+
+        if (!downloader.downloadUrl || !downloader.downloadUrl.success || !downloader.downloadUrl.link) {
+            return m.reply('❌ Gagal mendapatkan hasil download.');
+        }
+
+        await falcon.sendMessage(m.chat, {
+            audio: { url: downloader.downloadUrl.link },
+            mimetype: 'audio/mpeg',
+            ptt: false,
+            contextInfo: {
+                externalAdReply: {
+                    title: metadata.title,
+                    body: `${metadata.artists} - ${metadata.album}`,
+                    mediaType: 1,
+                    thumbnailUrl: metadata.cover_url,
+                    sourceUrl: metadata.link
+                }
+            }
+        }, { quoted: m });
+
+    } catch (error) {
+        console.error(error);
+        m.reply('❌ Terjadi kesalahan saat proses, silahkan coba lagi');
+    }
+}
+break
+
+case 'spotify': {
+    if (!text) return m.reply(`Masukkan judul lagu yang ingin Anda cari, Contoh: ${prefix + command} gala bunga mataharia`);
+    
+    m.reply('tunggu sebentar..'); 
+    
+    try {
+        let response = await axios.get(`http://kinchan.sytes.net/spotify?query=${encodeURIComponent(text)}`);
+        let data = response.data;
+
+        if (!data.status) return m.reply(`Error: ${data.msg}`);
+
+        let { title, artist, duration, popularity, preview, thumbnail: thumbnailUrl, url } = data.result;
+        let audioUrl = data.audio.url;
+
+        const thumbnails = await axios.get(thumbnailUrl, { responseType: 'arraybuffer' });
+        const thumbnail = Buffer.from(thumbnails.data, 'binary');
+
+        await falcon.sendMessage(m.chat, {
+            image: thumbnail,
+            caption: `🎵 *${title}*\n👤 *Artist:* ${artist}\n⏳ *Duration:* ${duration}\n✨ *Rate Song:* ${popularity}\n📌 *Preview:* ${preview || "No preview available"}\n🔗 *Spotify Link:* ${url}`,
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/mp4',
+            fileName: `${title}.mp3`,
+        }, { quoted: m });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("Terjadi kesalahan saat mengambil lagu dari spotify.");
+    }
+}
+break
+
+case 'spotifysearch': {
+ if (!text) return reply(`Masukkan judul yang ingin di search, Contoh: ${prefix + command} suzume`);
+
+ const searchQuery = text.trim();
+ m.reply('🔍 Sedang mencari hasil, mohon tunggu sebentar...');
+
+ try {
+ const searchResponse = await axios.get(`http://kinchan.sytes.net/spotify/search?query=${encodeURIComponent(searchQuery)}`);
+ const searching = searchResponse.data.data;
+
+ if (!searching || !searching.tracks || searching.tracks.length === 0) {
+ return m.reply('❌ Tidak ditemukan hasil untuk pencarian ini.');
+ }
+
+ let resultText = `🎵 *Hasil Pencarian Spotify untuk:* "${searchQuery}"\n\n`;
+ searching.tracks.forEach((track, index) => {
+ resultText += `*${index + 1}. ${track.title}*\n`;
+ resultText += `🎤 *Artis:* ${track.artists}\n`;
+ resultText += `💿 *Album:* ${track.album}\n`;
+ resultText += `⏳ *Duration:* ${Math.floor(track.duration / 60000)}:${((track.duration % 60000) / 1000).toFixed(0).padStart(2, '0')} menit\n`;
+ resultText += `📅 *Release:* ${track.release_date}\n`;
+ resultText += `🔗 *Spotify Link:* ${track.link}\n`;
+ resultText += `🆔 *ISRC:* ${track.isrc}\n`;
+ resultText += `\n━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+ });
+
+ await falcon.sendMessage(m.chat, {
+ image: { url: searching.tracks[0].cover_url },
+ caption: resultText.trim()
+ }, { quoted: m });
+
+ } catch (error) {
+ console.error(error);
+ m.reply('❌ Terjadi kesalahan saat mencari hasil, silahkan coba lagi.');
+ }
+}
+break
 // === Fun === //
 case 'afk': {
 if (!isGroup) return reply("Fitur khusus Grup")
@@ -2648,7 +2780,60 @@ let teks = `
 `
 return m.reply(teks)
 }
-break    
+break 
+case "cekidgc": {
+    if (!text) return m.reply("Masukin link grupnya!")
+    let regex = /chat\.whatsapp\.com\/([\w\d]*)/i
+    let match = text.match(regex)
+    if (!match) return m.reply("Link grup gak valid!")
+
+    let code = match[1]
+    let info = await falcon.groupGetInviteInfo(code)
+    
+    let teks = ` 乂 Info Group\n\n`
+    teks +=`* *Nama:* ${info.subject}\n`
+    teks +=`* *ID:* ${info.id}\n`
+    teks +=`* *Status:* ${info.announce == false ? "Terbuka" : "Hanya Admin"}\n`
+    teks += `* *Pembuat:* ${info?.subjectOwner ? info.subjectOwner.split("@")[0] : "Sudah Keluar"}\n`
+    
+    return m.reply(teks)
+}
+break  
+case "whatanime": {
+    let mediaMessage = m.quoted ? m.quoted : m;
+    if (!/image|video/.test(mediaMessage.mtype)) 
+        return m.reply("Kirim atau reply gambar/video anime yang mau dicari!");
+
+    let media = await falcon.downloadMediaMessage(mediaMessage);
+
+    if (!media) return m.reply("❌ Gagal mengambil media!");
+
+    await falcon.sendMessage(m.chat, { react: { text: "🔎", key: m.key } });
+
+    try {
+        let response = await fetch("https://api.trace.moe/search", {
+            method: "POST",
+            body: media,
+            headers: { "Content-type": /image/.test(mediaMessage.mtype) ? "image/jpeg" : "video/mp4" },
+        });
+
+        let json = await response.json();
+
+        if (!json.result.length) 
+            return m.reply("❌ Gak ketemu anime-nya, coba gambar/video lain!");
+
+        let { anilist, filename, episode, from, to, similarity, video, image } = json.result[0];
+        let caption = `🎬 *Anime Ditemukan!*\n\n📌 *Judul:* ${filename}\n📺 *Episode:* ${episode || "?"}\n⏳ *Waktu:* ${from.toFixed(2)}s - ${to.toFixed(2)}s\n📊 *Kemiripan:* ${(similarity * 100).toFixed(2)}%\n📽 *Preview:* ${video}`;
+
+        // Kirim gambar preview
+        await falcon.sendMessage(m.chat, { image: { url: image }, caption }, { quoted: m });
+
+    } catch (e) {
+        console.error(e);
+        m.reply("⚠️ Error saat mencari anime!");
+    }
+}
+break;   
           // AI //
 case "autoai": {
         if (!text) return reply(`*Contoh:* .autoai *[on/off/reset]*`);
@@ -3484,6 +3669,94 @@ case "cadmin-v2": {
   m.reply(`Berhasil menghapus server panel *${capital(nameSrv)}*`)
   }
   break
+ 
+ // Islamic Menu
+case 'surah': {
+    if (!args[0]) return reply(`📖 *Gunakan:* ${prefix}surah [nomor/nama]\n\nContoh:\n- ${prefix}surah 2\n- ${prefix}surah al-fatihah`);
+
+    let query = args.join(" ").toLowerCase();
+    let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/surah`);
+    
+    if (!data.result) return reply("❌ Gagal mengambil data surat!");
+    
+    let surat = data.result.find(s => s.number == query || s.name_id.toLowerCase() == query || s.name_en.toLowerCase() == query);
+    
+    if (!surat) return reply("❌ Surat tidak ditemukan!");
+
+    let pesan = `📖 *Surat ${surat.name_id} (${surat.name_en})*\n`;
+    pesan += `- 🏷 Nama Arab: ${surat.name_short}\n`;
+    pesan += `- 🔢 Nomor Surat: ${surat.number}\n`;
+    pesan += `- 📖 Jumlah Ayat: ${surat.number_of_verses}\n`;
+    pesan += `- 🏙️ Golongan: ${surat.revelation_id} (${surat.revelation_en})\n\n`;
+    pesan += `📜 *Tafsir Singkat:*\n${surat.tafsir.substring(0, 500)}...\n\n`;
+    pesan += `🎧 *Dengarkan:* ${prefix}playsurah ${surat.number}`;
+    
+    falcon.sendMessage(m.chat, { text: pesan }, { quoted: m });
+}
+break;
+
+case 'playsurah': {
+    if (!args[0]) return reply(`🎧 *Gunakan:* ${prefix}playsurah [nomor/nama]\n\nContoh:\n- ${prefix}playsurah 2\n- ${prefix}playsurah al-fatihah`);
+
+    let query = args.join(" ").toLowerCase();
+    let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/surah`);
+    
+    if (!data.result) return reply("❌ Gagal mengambil data surat!");
+
+    let surat = data.result.find(s => s.number == query || s.name_id.toLowerCase() == query || s.name_en.toLowerCase() == query);
+
+    if (!surat) return reply("❌ Surat tidak ditemukan!");
+
+    let audioUrl = surat.audio_url;
+    let fileSize = await getFileSizeFromUrl(audioUrl);
+
+    if (fileSize > 15000000) {
+        falcon.sendMessage(m.chat, {
+            document: { url: audioUrl },
+            fileName: `Surah_${surat.name_id}.mp3`,
+            mimetype: 'audio/mpeg'
+        }, { quoted: m });
+    } else {
+        falcon.sendMessage(m.chat, {
+            audio: { url: audioUrl },
+            mimetype: 'audio/mpeg',
+            ptt: false
+        }, { quoted: m });
+    }
+}
+break;
+case 'ayat': {
+    if (!args[0]) return reply(`📖 *Gunakan:*\n- ${prefix}ayat [nomor surat]:[nomor ayat]\n- ${prefix}ayat [nomor ayat]\n\nContoh:\n- ${prefix}ayat 2:255\n- ${prefix}ayat 255`);
+
+    let url;
+    if (args[0].includes(':')) {
+        let [surah, ayah] = args[0].split(':');
+        url = `https://rest.cloudkuimages.xyz/api/muslim/ayat/${surah}/${ayah}`;
+    } else {
+        url = `https://rest.cloudkuimages.xyz/api/muslim/ayat/${args[0]}`;
+    }
+
+    let { data } = await axios.get(url);
+    if (!data.result) return m.reply("❌ Ayat tidak ditemukan!");
+
+    let ayat = Array.isArray(data.result) ? data.result[0] : data.result;
+
+    let pesan = `📖 *QS. ${ayat.surah}:${ayat.ayah}*\n\n`;
+    pesan += `📜 *Arab:*\n${ayat.arab}\n\n`;
+    pesan += `🔤 *Latin:*\n_${ayat.latin}_\n\n`;
+    pesan += `📝 *Terjemahan:*\n${ayat.text}\n\n`;
+    pesan += `📌 *Juz:* ${ayat.juz} | 🕌 *Halaman:* ${ayat.page}\n`;
+    pesan += `\n🎧 Sedang mengirim audio...`;
+
+    falcon.sendMessage(m.chat, { text: pesan }, { quoted: m });
+
+    falcon.sendMessage(m.chat, {
+        audio: { url: ayat.audio },
+        mimetype: 'audio/mpeg',
+        ptt: false
+    }, { quoted: m });
+}
+break;
  
  //========================================// 
 case "update": {
