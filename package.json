@@ -1,6 +1,6 @@
 {
 "name": "FlowFalcon-Project",
-"version": "3.2.0",
+"version": "3.5.0",
 "description": "WhatsApp Bot By FlowFalcon",
 "main": "main.js",
 "type": "commonjs",

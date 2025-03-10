@@ -156,10 +156,10 @@ var body = (m.mtype === 'interactiveResponseMessage')
 : "";
 var budy = (typeof m.text == 'string' ? m.text : '')
 //==================================================//
-const prefa = ["", "!", ".", ",", "🐤", "🗿"]
-const prefix = /^[°zZ#$@+,.?=''():√%!¢£¥€π¤ΠΦ&><™©®Δ^βα¦|/\\©^]/.test(body) ? body.match(/^[°zZ#$@+,.?=''():√%¢£¥€π¤ΠΦ&><!™©®Δ^βα¦|/\\©^]/gi) : '.'
-const isCmd = body.includes(prefix)
-const command = body.replace(prefix, '').trim().split(/ +/).shift().toLowerCase()
+const prefa = ['.', '/', '!'];
+const prefix = prefa.find(p => body.startsWith(p)) || '.';
+const isCmd = body.startsWith(prefix);
+const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : '';
 const pushname = m.pushName
 const botNumber = await falcon.decodeJid(falcon.user.id)
 //==================================================//
@@ -185,7 +185,7 @@ const wibTime = moment().tz('Asia/Jakarta').format('HH:mm:ss')
 const penghitung = moment().tz("Asia/Jakarta").format("dddd, D MMMM - YYYY")
 //==================================================//
 const sender = m.key.fromMe ? (falcon.user.id.split(':')[0]+'@s.whatsapp.net' || falcon.user.id) : (m.key.participant || m.key.remoteJid)
-const owner = fs.readFileSync('./data/owner.json').toString()
+const owner = global.ownernumber
 const own = JSON.parse(fs.readFileSync('./data/owner.json').toString())
 const premium = fs.readFileSync('./data/premium.json').toString()
 const prem = JSON.parse(fs.readFileSync('./data/premium.json').toString())
@@ -194,10 +194,13 @@ const ban = JSON.parse(fs.readFileSync('./data/banned.json').toString())
 const isOwner = [owner, ...own].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 const isPremium = isOwner ? true : [premium, ...prem].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 const isBan = isOwner ? false : [banned, ...ban].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+const gcban = JSON.parse(fs.readFileSync('./data/gcban.json'))
+const isBanGroup = (chatId) => {
+    return gcban.includes(chatId.replace(/[^0-9]/g, '') + '@g.us')
+}
 const _afk = JSON.parse(fs.readFileSync('./data/afk.json'))
 const afk = require("./lib/general/afk")
 const isAfkOn = afk.checkAfkUser(m.sender, _afk)
-const antispam = require("./lib/general/antispam");
 //==================================================//
 const args = body.trim().split(/ +/).slice(1)
 const text = q = args.join(" ")
@@ -228,15 +231,7 @@ const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false;
 const groupMembers = isGroup ? groupMetadata.participants : ''
 //==================================================//
 // gambar
-const images = [
-"https://img86.pixhost.to/images/588/564679523_media.jpg",
-"https://img86.pixhost.to/images/588/564679589_media.jpg",
-"https://img86.pixhost.to/images/588/564679622_media.jpg",
-"https://img86.pixhost.to/images/588/564679679_media.jpg",
-"https://img86.pixhost.to/images/588/564679710_media.jpg",
-"https://img86.pixhost.to/images/588/564679716_media.jpg"
-]
-//==================================================//
+const images = global.images
 function getRandomImage() {
 const randomIndex = Math.floor(Math.random() * images.length)
 return images[randomIndex]
@@ -319,7 +314,7 @@ forwarsingScore: 999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName: "© FlowFalcon - 2025"
+newsletterName: `© ${global.namaowner}- 2025`,
 }
 }
 })
@@ -407,7 +402,7 @@ forwardingScore: 9999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName: "© FlowFalcon - 2025"
+newsletterName:`© ${global.namaowner}- 2025`,
 }
 }
 }, {
@@ -424,24 +419,6 @@ key: m.key
 }
 })
 }
-//==================================================//
-if (budy.startsWith('kntl', 'goblok', 'kontol', 'gblk', 'kntol', 'tolol', 'tlol', 'pea', 'ytm', 'yatim', 'yteam', 'ytim', 'lawak', 'memek', 'mmk', 'mmek', 'anj', 'ajg', 'anjg', 'anjing', 'anjink', 'lonte', 'ngentod', 'ngentot', 'ngewe', 'ngtd', 'ngntd', 'pepek', 'ppk', 'ppek', 'jomok', 'gila', 'asu', 'lonte', 'anjgg')) {
-if (!isGroup) return
-if (isOwner) return
-if (!isBotAdmins) return m.reply(`lu lebih ${budy}`)
-if (sender == botNumber) return
-m.reply("Allah tidak menyukai perkataan buruk, yang diucapkan secara terus terang kecuali oleh orang yang dizalimi. Dan Allah Maha mendengar, Maha mengetahui\n*QS. An-Nisa: 148*")
-falcon.sendMessage(m.chat, {
-delete: {
-remoteJid: m.chat,
-fromMe: false,
-id: m.key.id,
-participant: m.key.participant
-}
-})
-await falcon.groupParticipantsUpdate(m.chat, [sender], 'delete')
-}
-
 //==================================================//
 async function tiktok(url) {
 try {
@@ -509,7 +486,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: "\n© FlowFalcon - 2025",
+footer: `© ${global.namaowner}- 2025`,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${budy}`,
@@ -562,6 +539,10 @@ _afk.splice(afk.getAfkPosition(m.sender, _afk), 1)
 fs.writeFileSync("./data/afk.json", JSON.stringify(_afk))
 reply(`@${m.sender.split("@")[0]} telah kembali dari *AFK*\n\n*Alasan* : ${getReason}`)
 }
+}
+
+if (isCmd && !isOwner && isBanGroup(m.chat)) {
+    return
 }
 //==================================================//
 if (isCmd && m.isGroup) {
@@ -620,42 +601,39 @@ reject()
 }
 //=================================================//
 async function cariGC(query) {
-    try {
-        const { data } = await axios.get(`https://groupsor.link/group/searchmore/${query.replace(/ /g, '-')}`);
-        const $ = cheerio.load(data);
-        const result = [];
+try {
+const { data } = await axios.get(`https://groupsor.link/group/searchmore/${query.replace(/ /g, '-')}`);
+const $ = cheerio.load(data);
+const result = [];
+$('.maindiv').each((i, el) => {
+result.push({
+title: $(el).find('img').attr('alt')?.trim(),
+thumb: $(el).find('img').attr("src")?.trim(),
+});
+});
 
-        $('.maindiv').each((i, el) => {
-            result.push({
-                title: $(el).find('img').attr('alt')?.trim(),
-                thumb: $(el).find('img').attr("src")?.trim(),
-            });
-        });
-
-        $('div.post-info-rate-share > .joinbtn').each((i, el) => {
-            if (result[i]) {
-                result[i].link = $(el).find('a').attr("href")?.trim().replace('https://groupsor.link/group/join/', 'https://chat.whatsapp.com/');
-            }
-        });
-
-        $('.post-info').each((i, el) => {
-            if (result[i]) {
-                result[i].desc = $(el).find('.descri').text()?.replace('... continue reading', '.....').trim();
-            }
-        });
-
-        return result;
-    } catch (e) {
-        console.log(e);
-        return [];
-    }
+$('div.post-info-rate-share > .joinbtn').each((i, el) => {
+if (result[i]) {
+result[i].link = $(el).find('a').attr("href")?.trim().replace('https://groupsor.link/group/join/', 'https://chat.whatsapp.com/');
+}
+});
+$('.post-info').each((i, el) => {
+if (result[i]) {
+result[i].desc = $(el).find('.descri').text()?.replace('... continue reading', '.....').trim();
+}
+});
+return result;
+} catch (e) {
+console.log(e);
+return [];
+}
 }
 //==================================================//
 const configPath = './lib/groupConfig.json';
 
 function loadConfig() {
-  if (!fs.existsSync(configPath)) fs.writeFileSync(configPath, "{}");
-  return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+if (!fs.existsSync(configPath)) fs.writeFileSync(configPath, "{}");
+return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
 }
 
 function saveConfig(config) {
@@ -663,84 +641,172 @@ function saveConfig(config) {
 }
 
 function ensureGroupConfig(groupId) {
-  let config = loadConfig();
-  if (!config[groupId]) {
-    config[groupId] = {
-      welcome: false,
-      message: "Selamat datang @user di @grup!\n\n@desk",
-      buttons: [
-        { "buttonId": ".intro", "buttonText": "Perkenalan" },
-        { "buttonId": ".rules", "buttonText": "Aturan" }
-      ],
-      rules: "📌 Tidak ada peraturan yang ditetapkan!",
-      intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:",
-
-      jadwalSholat: {
-        aktif: false,
-        cityId: "",
-      },
-      jadwalPuasa: {
-        aktif: false
-      }
-    };
-    saveConfig(config);
-  }
+let config = loadConfig();
+if (!config[groupId]) {
+config[groupId] = {
+welcome: false,
+message: "Selamat datang @user di @grup!\n\n@desk",
+buttons: [
+{ "buttonId": ".intro", "buttonText": "Perkenalan" },
+{ "buttonId": ".rules", "buttonText": "Aturan" }
+],
+rules: "📌 Tidak ada peraturan yang ditetapkan!",
+intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:",
+jadwalSholat: {
+aktif: false,
+cityId: "",
+},
+jadwalPuasa: {
+aktif: false
+}
+};
+saveConfig(config);
+}
 }
 //=================================================//
 const headers = {
-    'Referer': 'https://www.pixiv.net/',
-    'Accept-Encoding': 'gzip, deflate, br'
+'Referer': 'https://www.pixiv.net/',
+'Accept-Encoding': 'gzip, deflate, br'
 };
-
 async function pixiv(query) {
-    let { data } = await axios.get(`https://www.pixiv.net/touch/ajax/tag_portal?word=${query}&lang=en&version=892d65fef9e1fc4efa5a1fd1c4675d6ae3e73835`, { headers })
-    return data.body.illusts
+let { data } = await axios.get(`https://www.pixiv.net/touch/ajax/tag_portal?word=${query}&lang=en&version=892d65fef9e1fc4efa5a1fd1c4675d6ae3e73835`, { headers })
+return data.body.illusts
+}
+async function getBuff(url) {
+let { data } = await axios.get(url, { 
+headers: {
+'Referer': 'https://www.pixiv.net/',
+'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+}, 
+responseType: 'arraybuffer' 
+})
+return data
+}
+//=================================================//
+async function getCookies() {
+    try {
+        const response = await axios.get('https://www.pinterest.com/csrf_error/');
+        const setCookieHeaders = response.headers['set-cookie'];
+        if (setCookieHeaders) {
+            const cookies = setCookieHeaders.map(cookieString => {
+                const cookieParts = cookieString.split(';');
+                const cookieKeyValue = cookieParts[0].trim();
+                return cookieKeyValue;
+            });
+            return cookies.join('; ');
+        } else {
+            console.warn('No set-cookie headers found in the response.');
+            return null;
+        }
+    } catch (error) {
+        console.error('Error fetching cookies:', error);
+        return null;
+    }
 }
 
+async function pinterest(query) {
+    try {
+        const cookies = await getCookies();
+        if (!cookies) {
+            console.log('Failed to retrieve cookies. Exiting.');
+            return;
+        }
 
-async function getBuff(url) {
-    let { data } = await axios.get(url, { 
-        headers: {
-            'Referer': 'https://www.pixiv.net/',
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-        }, 
-        responseType: 'arraybuffer' 
-    })
-    return data
+        const url = 'https://www.pinterest.com/resource/BaseSearchResource/get/';
+
+        const params = {
+            source_url: `/search/pins/?q=${query}`,
+            data: JSON.stringify({
+                "options": {
+                    "isPrefetch": false,
+                    "query": query,
+                    "scope": "pins",
+                    "no_fetch_context_on_resource": false
+                },
+                "context": {}
+            }),
+            _: Date.now()
+        };
+
+        const headers = {
+            'accept': 'application/json, text/javascript, */*, q=0.01',
+            'accept-encoding': 'gzip, deflate',
+            'accept-language': 'en-US,en;q=0.9',
+            'cookie': cookies,
+            'dnt': '1',
+            'referer': 'https://www.pinterest.com/',
+            'sec-ch-ua': '"Not(A:Brand";v="99", "Microsoft Edge";v="133", "Chromium";v="133"',
+            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="99.0.0.0", "Microsoft Edge";v="133.0.3065.92", "Chromium";v="133.0.6943.142"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-model': '""',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"10.0.0"',
+            'sec-fetch-dest': 'empty',
+            'sec-fetch-mode': 'cors',
+            'sec-fetch-site': 'same-origin',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0',
+            'x-app-version': 'c056fb7',
+            'x-pinterest-appstate': 'active',
+            'x-pinterest-pws-handler': 'www/[username]/[slug].js',
+            'x-pinterest-source-url': '/hargr003/cat-pictures/',
+            'x-requested-with': 'XMLHttpRequest'
+        };
+
+        const { data } = await axios.get(url, {
+            headers: headers,
+            params: params
+        })
+
+        const container = [];
+        const results = data.resource_response.data.results.filter((v) => v.images?.orig);
+        results.forEach((result) => {
+            container.push({
+                upload_by: result.pinner.username,
+                fullname: result.pinner.full_name,
+                followers: result.pinner.follower_count,
+                caption: result.grid_title,
+                image: result.images.orig.url,
+                source: "https://id.pinterest.com/pin/" + result.id,
+            });
+        });
+
+        return container;
+    } catch (error) {
+        console.log(error);
+        return [];
+    }
 }
 //=================================================//
 async function getListKota() {
-    try {
-        let { data } = await axios.get("https://rest.cloudkuimages.xyz/api/muslim/listkota");
-        if (!data || !data.result) return null;
-        return data.result; // Return array daftar kota
-    } catch (error) {
-        console.error("Error mengambil daftar kota:", error);
-        return null;
-    }
+try {
+let { data } = await axios.get("https://rest.cloudkuimages.com/api/muslim/listkota");
+if (!data || !data.result) return null;
+return data.result;
+} catch (error) {
+console.error("Error mengambil daftar kota:", error);
+return null;
+}
 }
 async function getJadwalSholat(cityId) {
-    let date = new Date().toISOString().split('T')[0]; // Ambil tanggal hari ini
-
-    try {
-        let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
-        if (!data || !data.result) return null;
-
-        return {
-            lokasi: data.result.lokasi,
-            daerah: data.result.daerah,
-            timezone: "Asia/Jakarta", 
-            imsak: data.result.jadwal.imsak,
-            subuh: data.result.jadwal.subuh,
-            dzuhur: data.result.jadwal.dzuhur,
-            ashar: data.result.jadwal.ashar,
-            maghrib: data.result.jadwal.maghrib,
-            isya: data.result.jadwal.isya
-        };
-    } catch (error) {
-        console.error("Error mengambil jadwal sholat:", error);
-        return null;
-    }
+let date = new Date().toISOString().split('T')[0];
+try {
+let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
+if (!data || !data.result) return null;
+return {
+lokasi: data.result.lokasi,
+daerah: data.result.daerah,
+timezone: "Asia/Jakarta", 
+imsak: data.result.jadwal.imsak,
+subuh: data.result.jadwal.subuh,
+dzuhur: data.result.jadwal.dzuhur,
+ashar: data.result.jadwal.ashar,
+maghrib: data.result.jadwal.maghrib,
+isya: data.result.jadwal.isya
+};
+} catch (error) {
+console.error("Error mengambil jadwal sholat:", error);
+return null;
+}
 }
 //=================================================//
 const SESSION_FILE = "./session/ai_sessions.json";
@@ -750,21 +816,24 @@ let sessions = fs.existsSync(SESSION_FILE) ? JSON.parse(fs.readFileSync(SESSION_
 function saveSession() {
     fs.writeFileSync(SESSION_FILE, JSON.stringify(sessions, null, 2));
 }
+const CAI_DB = "./session/cai_users.json";
+
+let cai_users = fs.existsSync(CAI_DB) ? JSON.parse(fs.readFileSync(CAI_DB)) : {};
+function saveCaiDB() {
+    fs.writeFileSync(CAI_DB, JSON.stringify(cai_users, null, 2));
+}
 //=================================================//
 const getFileSizeFromUrl = async (url) => {
-    try {
-        let response = await fetch(url, { method: 'HEAD' });
-        return response.headers.get('content-length') || 0;
-    } catch (err) {
-        console.error('Error fetching file size:', err);
-        return 0;
-    }
+try {
+let response = await fetch(url, { method: 'HEAD' });
+return response.headers.get('content-length') || 0;
+} catch (err) {
+console.error('Error fetching file size:', err);
+return 0;
+}
 };
 //=================================================//
-if (isCmd && !m.key.fromMe && antispam) {
-if (antispam.isFiltered(m.sender)) return m.reply('*( Anti Spam )* Tolong berikan jeda 5 detik.')
-antispam.addFilter(m.sender)
-}
+
 if (isCmd && autotyping) {
 if (command) { falcon.readMessages([m.key])}
 falcon.sendPresenceUpdate('composing', from)
@@ -807,7 +876,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: menu,
-footer: "\n© FlowFalcon - 2025",
+footer: `\n© ${global.namaowner}- 2025`,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -817,7 +886,7 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: "© FlowFalcon - 2025",
+title: `© ${global.namaowner}- 2025`,
 body: "Asistent Virtual"
 },
 },
@@ -837,8 +906,8 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: "© FlowFalcon - 2025",
-highlight_label: "FlowFalcon",
+title: `© ${global.namaowner} - 2025`,
+highlight_label: `${global.namaowner}`,
 rows: [{
 title: "allmenu",
 description: "menampilkan semua menu",
@@ -892,7 +961,8 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}public
 ▢ ${prefix}autoread
 ▢ ${prefix}autotyping
-▢ ${prefix}antispam
+▢ ${prefix}bangc
+▢ ${prefix}unbangc
 ▢ ${prefix}update
 ▢ ${prefix}reset
 
@@ -900,6 +970,7 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}brat
 ▢ ${prefix}bratimg
 ▢ ${prefix}bratvid
+▢ ${prefix}animebrat
 ▢ ${prefix}sticker
 ▢ ${prefix}qc
 
@@ -948,6 +1019,9 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 
 - 𝗔𝗜
 ▢ ${prefix}autoai
+▢ ${prefix}cai
+▢ ${prefix}caisearch
+▢ ${prefix}setcai
 
 - 𝗜𝗦𝗟𝗔𝗠𝗜𝗖 𝗠𝗘𝗡𝗨
 ▢ ${prefix}surah
@@ -988,7 +1062,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: allmenu,
-footer: "\n© FlowFalcon - 2025",
+footer: global.namaowner,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -998,8 +1072,8 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: "© FlowFalcon - 2025",
-body: "FlowFalcon Project"
+title: `© ${global.namaowner} - 2025`,
+body: `${global.namaowner}`
 },
 },
 viewOnce: true,
@@ -1018,8 +1092,8 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: "© FlowFalcon - 2025",
-highlight_label: "FlowFalcon",
+title: `© ${global.namaowner} - 2025`,
+highlight_label: `${global.namaowner}`,
 rows: [{
 title: "menu",
 description: "kembali ke menu awal",
@@ -1066,7 +1140,7 @@ _Gausah malu untuk join karena Isi member-nya ramah-ramah loh_
 
 sudah deh itu aja yang mau aku sampaikan silahkan gunakan fitur kami dengan bijak yah 😉 
 `,
-footer: "© FlowFalcon - 2025",
+footer: `© ${global.namaowner}- 2025`,
 buttons: [
 {
 buttonId: `${prefix}allmenu`,
@@ -1096,8 +1170,8 @@ var contact = generateWAMessageFromContent(m.chat, proto.Message.fromObject({
 "vcard": `BEGIN:VCARD
 VERSION:3.0
 N:;;;;
-FN: FlowFalcon 
-item1.TEL;waid=6287740310396:+6287740310396
+FN: ${global.namaowner} 
+item1.TEL;waid=${global.author}:+${global.author}
 item1.X-ABLabel:Ponsel
 X-WA-BIZ-DESCRIPTION: JANGAN DI SPAM
 X-WA-BIZ-NAME:
@@ -1333,7 +1407,30 @@ quoted: m
 })
 }
 break
+case 'bangc': {
+        if (!isOwner) return
+        if (!isGroup) return reply("❌ Command ini hanya bisa digunakan di grup!")
 
+        let gcben = m.chat.replace(/[^0-9]/g, '') + '@g.us'
+        if (isBanGroup(gcben)) return reply("⚠️ Grup ini sudah dibanned!")
+
+        gcban.push(gcben)
+        fs.writeFileSync('./data/gcban.json', JSON.stringify(gcban, null, 2))
+        reply(`✅ Grup ini telah dibanned!`)
+    }
+    break
+
+    case 'unbangc': {
+        if (!isOwner) return
+        let gcbenn = m.chat.replace(/[^0-9]/g, '') + '@g.us'
+
+        if (!isBanGroup(gcbenn)) return reply("⚠️ Grup ini tidak ada dalam daftar banned!")
+
+        gcban.splice(gcban.indexOf(gcbenn), 1)
+        fs.writeFileSync('./data/gcban.json', JSON.stringify(gcban, null, 2))
+        reply(`✅ Grup ini telah di-unbanned!`)
+    }
+    break
 case 'banned': {
 if (!isOwner) return
 if (!args[0]) return reply(penggunaan("628xxx"))
@@ -1399,39 +1496,22 @@ execSync("rm -rf backup.zip")
 break
 
 case "rvo": case "readviewonce": {
-if (!isOwner) return
-if (!m.quoted) return reply(penggunaan("dengan balas pesannya"))
+if (!m.quoted) return m.reply(example("dengan reply pesannya"))
 let msg = m.quoted.message
-let type = Object.keys(msg)[0]
-if (!msg[type].viewOnce) return reply("Pesan itu bukan viewonce!")
+    let type = Object.keys(msg)[0]
+if (!msg[type].viewOnce) return m.reply("Pesan itu bukan viewonce!")
 let media = await downloadContentFromMessage(msg[type], type == 'imageMessage' ? 'image' : type == 'videoMessage' ? 'video' : 'audio')
-let buffer = Buffer.from([])
-for await (const chunk of media) {
-buffer = Buffer.concat([buffer, chunk])
-}
-if (/video/.test(type)) {
-return falcon.sendMessage(m.chat, {
-video: buffer,
-caption: msg[type].caption || ""
-}, {
-quoted: m
-})
-} else if (/image/.test(type)) {
-return falcon.sendMessage(m.chat, {
-image: buffer,
-caption: msg[type].caption || ""
-}, {
-quoted: m
-})
-} else if (/audio/.test(type)) {
-return falcon.sendMessage(m.chat, {
-audio: buffer,
-mimetype: "audio/mpeg",
-ptt: true
-}, {
-quoted: m
-})
-} 
+    let buffer = Buffer.from([])
+    for await (const chunk of media) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    if (/video/.test(type)) {
+        return falcon.sendMessage(m.chat, {video: buffer, caption: msg[type].caption || ""}, {quoted: m})
+    } else if (/image/.test(type)) {
+        return falcon.sendMessage(m.chat, {image: buffer, caption: msg[type].caption || ""}, {quoted: m})
+    } else if (/audio/.test(type)) {
+        return falcon.sendMessage(m.chat, {audio: buffer, mimetype: "audio/mpeg", ptt: true}, {quoted: m})
+    } 
 }
 break
 
@@ -1497,54 +1577,75 @@ reply(`Error`)
 break
 
 // === Sticker Menu === //
-case "brat-animated":
-case "bratvid": { 
-    if (!text) return m.reply('teksnya harus diisi!');
-    
-    let res = await fetch(`https://brat.zellray.my.id/animate?text=${text}`);
-    if (!res.ok) return m.reply('API Error: ' + res.statusText);
-    
-    // Perbaikan dengan arrayBuffer
-    let arrayBuffer = await res.arrayBuffer();
-    let gifBuffer = Buffer.from(arrayBuffer);
-    
-    let webpBuffer = await gifToWebp(gifBuffer);
-    await await falcon.sendMessage(m.chat, { sticker: webpBuffer }, { quoted: m });
+case "bratimg": { 
+    if (!text) return reply('❌ Masukkan teks untuk membuat stiker.');
+
+    try {
+        const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}&isVideo=false&delay=500`;
+        const response = await axios.get(url, { responseType: "arraybuffer" });
+
+        const { Sticker } = require('wa-sticker-formatter');
+        const sticker = new Sticker(response.data, {
+            pack: packname,
+            author: author,
+            type: "image",
+        });
+
+        const stikerBuffer = await sticker.toBuffer();
+        falcon.sendMessage(m.chat, { sticker: stikerBuffer }, { quoted: m });
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        reply("Terjadi kesalahan saat membuat stiker.");
+    }
 }
 break;
-    
-case "bratimg": {
-if (isBan) return
-if (!text) return reply(penggunaan("falcon ganteng"))
-try {
-const url = `https://vapis.my.id/api/bratv1?q=${encodeURIComponent(text)}`;
-const response = await axios.get(url, {
-responseType: "arraybuffer"
-})
-const { Sticker } = require('wa-sticker-formatter')
-const sticker = new Sticker(response.data, {
-pack: packname,
-author: author,
-type: "image/png",
-})
-const stikerBuffer = await sticker.toBuffer()
-falcon.sendMessage(m.chat, {
-sticker: stikerBuffer
-}, {
-quoted: m
-})
-} catch (err) {
-console.error("Error:", err)
+
+case "brat-animated":
+case "bratvid": { 
+    if (!text) return reply('❌ Masukkan teks untuk membuat stiker animasi.');
+
+    try {
+        const url = `https://api.siputzx.my.id/api/m/brat?text=${encodeURIComponent(text)}&isVideo=true&delay=500`;
+        const response = await axios.get(url, { responseType: "arraybuffer" });
+
+        const { writeFileSync, unlinkSync } = require('fs');
+        const { exec } = require('child_process');
+        const path = "./session/";
+        const inputPath = `${path}brat.mp4`;
+        const outputPath = `${path}brat.webp`;
+
+        // Simpan video sementara
+        writeFileSync(inputPath, response.data);
+
+        // Konversi MP4 ke WebP menggunakan ffmpeg
+        exec(`ffmpeg -i ${inputPath} -vf "scale=512:512:flags=lanczos,format=rgba" -loop 0 -preset default -an -vsync 0 ${outputPath}`, async (err) => {
+            if (err) {
+                console.error("❌ Error konversi video:", err);
+                return reply("Terjadi kesalahan saat mengonversi video ke stiker.");
+            }
+
+            const webpBuffer = require('fs').readFileSync(outputPath);
+            falcon.sendMessage(m.chat, { sticker: webpBuffer }, { quoted: m });
+
+            // Hapus file sementara
+            unlinkSync(inputPath);
+            unlinkSync(outputPath);
+        });
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        reply("Terjadi kesalahan saat membuat stiker animasi.");
+    }
 }
-}
-break
+break;
 case 'brat':
 if (!text) return m.reply(`Example: .brat Aku Anak Sigma 🤫🧏`);
 try {
 let caption = `Silahkan pilih tipe yang diinginkan:\n\n1. *Gambar 🖼️*\n2. *Video 🎥*`;
 falcon.sendMessage(m.chat, {
 text: caption,
-footer: `FlowFalcon ~ 2025`,
+footer: `${global.namaowner} ~ 2025`,
 buttons: [
 {
 buttonId: `.bratimg ${text}`,
@@ -1562,7 +1663,28 @@ console.error(err);
 m.reply(`*Terjadi kesalahan!* 😭\n${err.message || err}`);
 }
 break;
+case 'animebrat': {
+    if (!text) return m.reply('Masukkan teks untuk stiker.');
 
+    try {
+        const apiUrl = `https://fastrestapis.fasturl.cloud/maker/animbrat?text=${encodeURIComponent(text)}&position=center&mode=image`;
+        let response = await fetch(apiUrl);
+        let buffer = await response.arrayBuffer();
+
+        // Konversi ke format webp
+        let webpBuffer = await sharp(Buffer.from(buffer))
+            .toFormat('webp')
+            .toBuffer();
+
+        falcon.sendMessage(m.chat, { 
+            sticker: webpBuffer 
+        }, { quoted: m });
+    } catch (e) {
+        console.error(e);
+        reply('Terjadi kesalahan saat membuat stiker.');
+    }
+}
+break;
 case 'sticker':
 case 'stiker':
 case 's':{
@@ -1636,7 +1758,7 @@ case 'tourl': case 'nurl': {
     form.append('file', fs.createReadStream(media));
 
     try {
-        let { data } = await axios.post('https://cloudkuimages.xyz/upload', form, {
+        let { data } = await axios.post('https://cloudkuimages.com/upload', form, {
             headers: { ...form.getHeaders() }
         });
 
@@ -1920,7 +2042,7 @@ Gunakan perintah ini:
 📌 *Semua waktu dihitung berdasarkan kota yang telah diset!*  
 📢 *Gunakan* \`.sholat\` *untuk melihat panduan ini kapan saja!*
 🌐 *Rest-API Yang Di Gunakan Untuk Mengambil Data Jadwal Sholat*
-> https://rest.cloudkuimages.xyz`;
+> https://rest.cloudkuimages.com`;
 
 return reply(pesan);
 }
@@ -2031,43 +2153,34 @@ case 'xytmp3':
 case 'ytaudio':   
 case 'ytmp3':   
 case 'yta': {  
-    if (!text) return m.reply(`Gunakan: ${prefix + command} <url> [bitrate]`);  
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>`);  
 
-    let url = args[0];   
-    let bitrate = args[1] && !isNaN(args[1]) ? args[1] : "128";   
+    let url = args[0];
 
     try {  
         await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-        let info = await getVideoInfo(url);
-        if (!info || !info.status) return m.reply('❌ Gagal mendapatkan informasi video.');
+        let response = await fetch(`https://rest.cloudkuimages.com/api/download/ytmp3?url=${encodeURIComponent(url)}`);
+        let result = await response.json();
+
+        if (!result.status) return m.reply('❌ Gagal mendapatkan audio.');
 
         await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
 
-        let audio = await downloadAudio(url, bitrate);
-        if (!audio.status || !audio.downloadUrl) return m.reply('❌ Gagal mendapatkan file audio.');
-
-        console.log('Audio Info:', audio); // Debugging
-
-        let captionInfo = `🎵 *${info.title}*\n👤 *Creator:* ${info.creator}\n⏳ *Durasi:* ${info.duration} detik\n📡 *Sumber:* ${audio.source}\n🎶 *Bitrate:* ${bitrate}kbps\n🔗 *URL:* ${info.url}`;
+        let { metadata } = result;
+        let captionInfo = `🎵 *${metadata.title}*\n👤 *Author:* ${metadata.author}\n🔗 *Bitrate:* ${metadata.bitrate}kbps`;
 
         await falcon.sendMessage(m.chat, {
-            image: { url: info.thumbnail },
+            image: { url: metadata.thumbnail || '' },
             caption: captionInfo
         }, { quoted: m });
 
         await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
 
-        let fileSize = await getFileSizeFromUrl(audio.downloadUrl);
-        console.log('File Size (bytes):', fileSize); // Debugging
-
-        let captionMedia = `🎵 *${info.title}*\n👤 *${info.creator}*\n📡 *Sumber:* ${audio.source}`;
-
         await falcon.sendMessage(m.chat, { 
-            [fileSize > 15 * 1024 * 1024 ? "document" : "audio"]: { url: audio.downloadUrl },
+            audio: { url: metadata.download_url },
             mimetype: 'audio/mp4',
-            fileName: `${info.title}.mp3`,
-            caption: captionMedia
+            fileName: `${metadata.title}.mp3`
         }, { quoted: m });
 
         await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
@@ -2083,43 +2196,34 @@ case 'xytmp4':
 case 'ytmp4':   
 case 'ytvideo':   
 case 'ytv': {  
-    if (!text) return m.reply(`Gunakan: ${prefix + command} <url> [resolusi]`);  
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>`);  
 
-    let url = args[0];   
-    let resolution = args[1] && !isNaN(args[1]) ? args[1] : "720";  
+    let url = args[0];
 
     try {  
         await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-        let info = await getVideoInfo(url);
-        if (!info || !info.status) return m.reply('❌ Gagal mendapatkan informasi video.');
+        let response = await fetch(`https://rest.cloudkuimages.com/api/download/ytmp4?url=${encodeURIComponent(url)}`);
+        let result = await response.json();
+
+        if (!result.status) return m.reply('❌ Gagal mendapatkan video.');
 
         await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
 
-        let video = await downloadVideo(url, resolution);
-        if (!video.status || !video.downloadUrl) return m.reply('❌ Gagal mendapatkan file video.');
-
-        console.log('Video Info:', video); // Debugging
-
-        let captionInfo = `📹 *${info.title}*\n👤 *Creator:* ${info.creator}\n⏳ *Durasi:* ${info.duration} detik\n📡 *Sumber:* ${video.source}\n🎥 *Resolusi:* ${resolution}p\n🔗 *URL:* ${info.url}`;
+        let { metadata } = result;
+        let captionInfo = `📹 *${metadata.title}*\n👤 *Author:* ${metadata.author}\n📡 *Resolusi:* ${metadata.resolution}p`;
 
         await falcon.sendMessage(m.chat, {
-            image: { url: info.thumbnail },
+            image: { url: metadata.thumbnail || '' },
             caption: captionInfo
         }, { quoted: m });
 
         await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
 
-        let fileSize = await getFileSizeFromUrl(video.downloadUrl);
-        console.log('File Size (bytes):', fileSize); // Debugging
-
-        let captionMedia = `📹 *${info.title}*\n👤 *${info.creator}*\n📡 *Sumber:* ${video.source}`;
-
         await falcon.sendMessage(m.chat, { 
-            [fileSize > 15 * 1024 * 1024 ? "document" : "audio"]: { url: video.downloadUrl },
+            video: { url: metadata.download_url },
             mimetype: 'video/mp4',
-            fileName: `${info.title}.mp3`,
-            caption: captionMedia
+            fileName: `${metadata.title}.mp4`
         }, { quoted: m });
 
         await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
@@ -2156,7 +2260,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: "\n© FlowFalcon - 2025",
+footer: `© ${global.namaowner}- 2025`,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${text}`,
@@ -2193,7 +2297,7 @@ const vidnya = data.video.noWatermark
 const caption = `${data.title}`
 reaction("✅")
 falcon.sendMessage(m.chat, {
-caption: "Download By FlowFalcon",
+caption: `Download By ${global.namaowner}`,
 video: {
 url: vidnya
 }
@@ -2276,74 +2380,69 @@ quoted: m
 }
 break
 
-case 'pinterest':
-case 'pin': {
-if (isBan) return
-if (!text) return reply(penggunaan("cewe seksi"))
-reaction("⏳")
-let { data } = await axios.get(`https://www.pinterest.com/resource/BaseSearchResource/get/?source_url=%2Fsearch%2Fpins%2F%3Fq%3D${text}&data=%7B%22options%22%3A%7B%22isPrefetch%22%3Afalse%2C%22query%22%3A%22${text}%22%2C%22scope%22%3A%22pins%22%2C%22no_fetch_context_on_resource%22%3Afalse%7D%2C%22context%22%3A%7B%7D%7D&_=1619980301559`)
- let res = data.resource_response.data.results.map(v => v.images.orig.url)
-if (res.length == 0) return reply("Error, Foto Tidak Ditemukan")
-if (res.length < 25) {
-anuan = res
-} else {
-anuan = res.slice(0,25)
-}
-let anu = new Array()
-for (let ii of anuan) {
-let imgsc = await prepareWAMessageMedia({ image: { url: `${ii}`} }, { upload: falcon.waUploadToServer })
-anu.push({
-header: proto.Message.InteractiveMessage.Header.fromObject({
-title: `Hasil Foto Ke *${anuan.indexOf(ii) + 1}*`, 
-hasMediaAttachment: true,
-...imgsc
-}),
-nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-buttons: [
-{
-name: "cta_url",
-buttonParamsJson: `{
-"display_text": "Link Tautan Foto",
-"url": "${ii}",
-"merchant_url": "https://www.google.com"
-}`
-}
-]
-}), 
-footer: proto.Message.InteractiveMessage.Footer.create({
- text: namabot
-})
-})
-}
+case 'pin':
+case 'pinterest': {
+    if (!text) return reply(`Format salah, contoh: \n${prefix + command} Anime`)
 
-const msg = await generateWAMessageFromContent(m.chat, {
-viewOnceMessage: {
-message: {
-messageContextInfo: {
-deviceListMetadata: {},
-deviceListMetadataVersion: 2
-},
-interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-body: proto.Message.InteractiveMessage.Body.fromObject({
-text: `🔎 Berikut Adalah Hasil Pencarian Foto Dari *${text}*`
-}),
-carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-cards: anu
-})
-})
-}
-}
-}, {
-userJid: sender,
-quoted: m
-})
- 
-falcon.relayMessage(m.chat, msg.message, {
-messageId: msg.key.id
-})
+    reaction("⏳") // Biar ada indikator loading
+    
+    let anutrest = await pinterest(text) // Ambil hasil pencarian
+    if (!anutrest || anutrest.length === 0) return reply("Error, Foto Tidak Ditemukan")
+
+    // Ambil maksimal 10 gambar biar nggak terlalu panjang
+    let selectedImages = anutrest.slice(0, 5);
+    let anu = []
+
+    for (let i = 0; i < selectedImages.length; i++) {
+        let imgsc = await prepareWAMessageMedia(
+            { image: { url: selectedImages[i].image } }, 
+            { upload: falcon.waUploadToServer }
+        )
+
+        anu.push({
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+                title: `Gambar ke *${i + 1}*`, 
+                hasMediaAttachment: true,
+                ...imgsc
+            }),
+            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons: [{
+                    name: "cta_url",
+                    buttonParamsJson: JSON.stringify({
+                        display_text: "Lihat di Pinterest",
+                        url: selectedImages[i].source || selectedImages[i].image
+                    })
+                }]
+            }), 
+            footer: proto.Message.InteractiveMessage.Footer.create({
+                text: "FalconProject"
+            })
+        })
+    }
+
+    // Buat format `carouselMessage`
+    const msg = await generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                    body: proto.Message.InteractiveMessage.Body.fromObject({
+                        text: `🔎 Berikut hasil pencarian gambar untuk *${text}*`
+                    }),
+                    carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+                        cards: anu
+                    })
+                })
+            }
+        }
+    }, {
+        userJid: sender,
+        quoted: m
+    })
+
+    falcon.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
 }
 break
-
 // === Music === //
 case 'plays':
 case 'play': 
@@ -2767,20 +2866,45 @@ case "ping": {
 }
 break;  
 case "cekidch": case "idch": {
-if (!text) return m.reply(penggunaan ("linkchnya"))
-if (!text.includes("https://whatsapp.com/channel/")) return m.reply("Link tautan tidak valid")
-let result = text.split('https://whatsapp.com/channel/')[1]
-let res = await falcon.newsletterMetadata("invite", result)
-let teks = `
+    if (!text) return m.reply(penggunaan("linkchnya"))
+    if (!text.includes("https://whatsapp.com/channel/")) return m.reply("Link tautan tidak valid")
+
+    let result = text.split('https://whatsapp.com/channel/')[1]
+    let res = await falcon.newsletterMetadata("invite", result)
+
+    let teks = `
 * *ID :* ${res.id}
 * *Nama :* ${res.name}
 * *Total Pengikut :* ${res.subscribers}
 * *Status :* ${res.state}
 * *Verified :* ${res.verification == "VERIFIED" ? "Terverifikasi" : "Tidak"}
 `
-return m.reply(teks)
+
+    let msgii = generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                interactiveMessage: proto.Message.InteractiveMessage.create({
+                    body: proto.Message.InteractiveMessage.Body.create({ 
+                        text: teks
+                    }), 
+                    footer: proto.Message.InteractiveMessage.Footer.create({ 
+                        text: `© ${global.namaowner} - 2025`
+                    }), 
+                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                        buttons: [{
+                            "name": "cta_copy",
+                            "buttonParamsJson": `{\"display_text\":\"Copy ID Channel\",\"id\":\"123456789\",\"copy_code\":\"${res.id}\"}`
+                        }]
+                    })
+                })
+            }
+        }
+    }, { userJid: m.sender, quoted: m })
+
+    await falcon.relayMessage(m.chat, msgii.message, { messageId: msgii.key.id })
 }
-break 
+break
 case "cekidgc": {
     if (!text) return m.reply("Masukin link grupnya!")
     let regex = /chat\.whatsapp\.com\/([\w\d]*)/i
@@ -2789,16 +2913,40 @@ case "cekidgc": {
 
     let code = match[1]
     let info = await falcon.groupGetInviteInfo(code)
-    
-    let teks = ` 乂 Info Group\n\n`
-    teks +=`* *Nama:* ${info.subject}\n`
-    teks +=`* *ID:* ${info.id}\n`
-    teks +=`* *Status:* ${info.announce == false ? "Terbuka" : "Hanya Admin"}\n`
+
+    let teks = ` 乂 *Info Group*\n\n`
+    teks += `* *Nama:* ${info.subject}\n`
+    teks += `* *ID:* ${info.id}\n`
+    teks += `* *Status:* ${info.announce == false ? "Terbuka" : "Hanya Admin"}\n`
     teks += `* *Pembuat:* ${info?.subjectOwner ? info.subjectOwner.split("@")[0] : "Sudah Keluar"}\n`
-    
-    return m.reply(teks)
+
+    let msgii = generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                interactiveMessage: proto.Message.InteractiveMessage.create({
+                    body: proto.Message.InteractiveMessage.Body.create({ 
+                        text: teks
+                    }), 
+                    footer: proto.Message.InteractiveMessage.Footer.create({ 
+                        text: `© ${global.namaowner} - 2025`
+                    }), 
+                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                        buttons: [
+                            {
+                                "name": "cta_copy",
+                                "buttonParamsJson": `{\"display_text\":\"Copy ID Grup\",\"id\":\"123456789\",\"copy_code\":\"${info.id}\"}`
+                            }
+                        ]
+                    })
+                })
+            }
+        }
+    }, { userJid: m.sender, quoted: m })
+
+    await falcon.relayMessage(m.chat, msgii.message, { messageId: msgii.key.id })
 }
-break  
+break
 case "whatanime": {
     let mediaMessage = m.quoted ? m.quoted : m;
     if (!/image|video/.test(mediaMessage.mtype)) 
@@ -2854,6 +3002,91 @@ case "autoai": {
         }
     }
     break;
+    // CAI
+case "caisearch": {
+    if (!text) return m.reply("⚡ *Contoh:* .caisearch Nahida");
+
+    try {
+        let { data } = await axios.get(`https://cai.neekoi.me/search?q=${encodeURIComponent(text)}`);
+        if (!data.characters || data.characters.length === 0) return m.reply("⚠️ Karakter tidak ditemukan!");
+
+        let char = data.characters[0]; // Ambil karakter pertama yang paling relevan
+        let charID = char.external_id;
+        let profile = `🔍 *Profil Karakter CAI:*
+🟢 *Nama:* ${char.participant__name}
+📜 *Judul:* ${char.title}
+🎭 *Creator:* ${char.user__username}
+💬 *Greeting:* ${char.greeting}
+🔗 *ID:* ${charID}`;
+
+        falcon.sendMessage(m.chat, {
+            text: profile,
+            footer: "© FlowFalcon - 2025",
+            buttons: [
+                {
+                    buttonId: `${prefix}setcai ${charID}`,
+                    buttonText: { displayText: "Set Character AI" }
+                }
+            ],
+            viewOnce: true,
+            headerType: 1
+        }, { quoted: m });
+
+    } catch (err) {
+        console.error(err);
+        return m.reply("⚠️ Terjadi kesalahan saat mencari karakter!");
+    }
+}
+break;
+
+case "setcai": {
+    if (!text) return m.reply("⚡ *Contoh:* .setcai PfwqGXduLsrsncRQt1G4nRyBcqLSxcLsnjR44rxJgRY");
+
+    cai_users[sender] = { char_id: text, active: false };
+    saveCaiDB();
+
+    return m.reply(`✅ *Karakter berhasil disimpan!*\nGunakan \`.cai start\` untuk mulai ngobrol.`);
+}
+break;
+
+case "cai": {
+    if (!text) return m.reply("⚡ *Contoh:* .cai start / .cai reset / .cai off");
+
+    if (text === "start") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*\nGunakan `.setcai <id>` terlebih dahulu.");
+
+        cai_users[sender].active = true;
+        saveCaiDB();
+
+        return m.reply(`✅ *AutoChat CAI diaktifkan!*\nSekarang bot akan ngobrol otomatis dengan karakter.`);
+    }
+
+    if (text === "reset") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
+
+        try {
+            let { data } = await axios.get(`https://cai.neekoi.me/newchat?id=${cai_users[sender].char_id}`);
+            if (!data.external_id) return m.reply("⚠️ Gagal mereset sesi!");
+
+            cai_users[sender].chat_id = data.external_id;
+            saveCaiDB();
+
+            return m.reply(`♻️ *Sesi chat berhasil direset!*`);
+        } catch (err) {
+            console.error(err);
+            return m.reply("⚠️ Terjadi kesalahan saat mereset sesi!");
+        }
+    }
+
+    if (text === "off") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
+
+        cai_users[sender].active = false;
+        saveCaiDB();
+
+        return m.reply(`❌ *AutoChat CAI dimatikan!*`);
+    }
+}
           //cpanel menu server 1 //
 case "cadmin": {
 if (!isOwner
@@ -3675,7 +3908,7 @@ case 'surah': {
     if (!args[0]) return reply(`📖 *Gunakan:* ${prefix}surah [nomor/nama]\n\nContoh:\n- ${prefix}surah 2\n- ${prefix}surah al-fatihah`);
 
     let query = args.join(" ").toLowerCase();
-    let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/surah`);
+    let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/surah`);
     
     if (!data.result) return reply("❌ Gagal mengambil data surat!");
     
@@ -3699,7 +3932,7 @@ case 'playsurah': {
     if (!args[0]) return reply(`🎧 *Gunakan:* ${prefix}playsurah [nomor/nama]\n\nContoh:\n- ${prefix}playsurah 2\n- ${prefix}playsurah al-fatihah`);
 
     let query = args.join(" ").toLowerCase();
-    let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/surah`);
+    let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/surah`);
     
     if (!data.result) return reply("❌ Gagal mengambil data surat!");
 
@@ -3731,9 +3964,9 @@ case 'ayat': {
     let url;
     if (args[0].includes(':')) {
         let [surah, ayah] = args[0].split(':');
-        url = `https://rest.cloudkuimages.xyz/api/muslim/ayat/${surah}/${ayah}`;
+        url = `https://rest.cloudkuimages.com/api/muslim/ayat/${surah}/${ayah}`;
     } else {
-        url = `https://rest.cloudkuimages.xyz/api/muslim/ayat/${args[0]}`;
+        url = `https://rest.cloudkuimages.com/api/muslim/ayat/${args[0]}`;
     }
 
     let { data } = await axios.get(url);
@@ -3825,6 +4058,24 @@ if (typeof evaled !== "string") evaled = util.inspect(evaled)
 } catch (e) {
 console.log(e)
 }
+}
+//=================================================//
+if (cai_users[sender] && cai_users[sender].active) {
+    if (m.isBaileys && m.fromMe) return;
+    if (!m.text) return;
+    if ([".", "#", "!", "/", "\\"].some(prefix => m.text.startsWith(prefix))) return;
+
+    try {
+        let { char_id } = cai_users[sender];
+        let { data } = await axios.get(`https://cai.neekoi.me/cai?char=${char_id}&message=${encodeURIComponent(m.text)}`);
+
+        if (!data.reply) return m.reply("⚠️ Karakter tidak memberikan balasan!");
+
+        m.reply(data.reply);
+    } catch (err) {
+        console.error("Error fetching data:", err);
+        return m.reply("⚠️ Maaf, terjadi kesalahan saat memproses permintaan.");
+    }
 }
 //=================================================//
 if (sessions[sender]) {

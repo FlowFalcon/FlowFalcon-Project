@@ -1,6 +1,6 @@
 # FlowFalcon Project  
 
-![FlowFalcon Profile Card](https://cardivo.vercel.app/api?name=FlowFalcon~Project&description=Bot%20WhatsApp%20multi-fungsi%20dengan%20fitur%20menarik!%20🚀&image=https://img12.pixhost.to/images/600/571754322_flowfalcon-media.jpg&backgroundColor=%23ecf0f1&github=FlowFalcon&pattern=topography&colorPattern=%23eaeaea&animation=true)
+![FlowFalcon Profile Card](https://cardivo.vercel.app/api?name=FlowFalcon~Project&description=Bot%20WhatsApp%20multi-fungsi%20dengan%20fitur%20menarik!%20🚀&image=https://img12.pixhost.to/images/600/571754322_flowfalcon-media.jpg&backgroundColor=%ffffff00&github=FlowFalcon&pattern=topography&colorPattern=%23eaeaea&animation=true)
 
 FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbagai fitur keren buat memudahkan hidup lo!  
 
@@ -10,17 +10,17 @@ FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbag
 # ⚠️ Registration is required 
 
 ## *Untuk menggunakan script ini, kamu harus daftar dulu di grup secara gratis**  
-## 🔹 **Group Room Chat:** [Klik Disini](https://chat.whatsapp.com/DBplvblerPL9ieFFcmofqq) 
+## 🔹 **Group Room Chat:** [Klik Disini](https://chat.whatsapp.com/DBplvblerPL9ieFFcmofqq)  
 
 ---
 
 ## 🚀 Fitur Utama  
 
 ✅ **Manajemen Grup** (Welcome, Anti-link, Auto Close Group)  
-✅ **Download Media** (YouTube, TikTok, Instagram, Facebook)  
+✅ **Download Media** (YouTube, TikTok)  
 ✅ **Stiker & Media** (Convert ke stiker, brat image/video)  
 ✅ **Fitur Fun & Tools** (Pixiv, Cari Grup, ToURL, AutoAI)  
-✅ **Auto Moderasi** (Anti-Spam, AutoTyping, AutoRead)  
+✅ **Islamic Fitur** (Surah, Ayat, Murotal Player)
 
 ## 🔧 Instalasi  
 
@@ -35,7 +35,7 @@ FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbag
    ```  
 3. **Jalankan Bot**  
    ```bash
-   node main.js
+   npm start
    ```  
 
 ## 📜 Konfigurasi  
@@ -43,9 +43,10 @@ FlowFalcon Project adalah bot WhatsApp berbasis **Baileys** yang memiliki berbag
 Edit file `config.js` sebelum menjalankan bot:  
 
 ```js
-global.owner = ['628xxx@s.whatsapp.net'] // Ganti dengan nomor owner
-global.sessionName = 'session' // Nama session
-global.prefix = ['!', '.', '/'] // Prefix command
+global.namaowner = "FlowFalcon"
+global.namabot = "Falcon"
+global.ownernumber = "6287740310396"
+global.idSaluran = "120363329290204598@newsletter"
 ```  
 
 ## 📌 Daftar Menu  
@@ -79,10 +80,13 @@ global.prefix = ['!', '.', '/'] // Prefix command
 ### 🎭 **Fun Menu**  
 - `tourl <media>` - Upload file ke URL  
 - `carigc <query>` - Cari grup WhatsApp  
-- `pixiv <query>` - Cari gambar di Pixiv 
+- `pixiv <query>` - Cari gambar di Pixiv  
 
 ### 🤖 **AI Menu**  
 - `autoai on/off/reset` - Chat dengan AI secara otomatis
+- `caisearch <query>` - mencari informasi character ai
+- `cai on/off/reset` - Chat dengan character ai secara otomatis
+` setcai <id>` - Setting Character AI Yang akan di ajak chat
 
 ## 📢 Join Komunitas  
 
@@ -91,11 +95,9 @@ global.prefix = ['!', '.', '/'] // Prefix command
 
 ## 🎖️ Thanks To  
 
-💙 **Afgan** – Pemilik Base Ori   
-💙 **AlwaysRicky** – Kontributor Fitur   
-💙 **Fathur** – Pengembang Tambahan   
-💙 **Alfi Dev** – Penyedia API   
-💙 **My Followers** – Supporter For Me  
-💙 **AI** – Error Debugging    
- 
+💙 **Afgan** – Pemilik Base Ori  
+💙 **AlwaysRicky** – Kontributor Fitur  
+💙 **Fathur** – Pengembang Tambahan  
+💙 **AI** – Error Debugging  
+
 ---

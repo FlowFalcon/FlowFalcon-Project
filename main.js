@@ -142,28 +142,25 @@ return decode.user && decode.server && decode.user + '@' + decode.server || jid;
 const { pairings } = require("flowfalcon-security");
 if (!falcon.authState.creds.registered) {
     console.clear();
-say(`Hello There Welcome To My Script
+say(`💠 Welcome to FlowFalcon~Project 💠
 ===========================================
-   • Script     : FlowFalcon~Project
-   • Developer : FlowFalcon 
-   • Version   : 3.2
-   • Type      : Free
+   🔹 Script     : FlowFalcon~Project  
+   🔹 Developer  : FlowFalcon  
+   🔹 Version    : 3.5  
+   🔹 Type       : Free  
 ===========================================
-Script ini gratis dan bisa di dapatkan 
-di group / channel WhatsApp kami
-Silahkan Login Dengan Akun Yang Terdaftar 
-Dengan Nomor Bot Anda
-Jika Tidak Ada Akun Silahkan Registrasi
-Di Group WhatsApp Kami Terlebih Dahulu
+📌 Silakan login dengan akun yang terdaftar  
+📌 Jika belum memiliki akun, silakan daftar  
+   melalui grup WhatsApp kami terlebih dahulu.  
 
-  • Group Chat : flowfalcon.xyz/group/
-  • Channel    : flowfalcon.xyz/channel/
-  
+🔗 Group Chat : flowfalcon.xyz/group/  
+🔗 Channel    : flowfalcon.xyz/channel/  
+
 ===========================================\n`, {
-font: 'console',
-align: 'left',
-gradient: [randomcolor, randomcolor]
-})
+  font: 'console',
+  align: 'left',
+  gradient: [randomcolor, randomcolor]
+});
   await pairings(falcon, question);
 }
 
@@ -307,15 +304,20 @@ console.log(color(`Mengkoneksikan`,`${randomcolor}`)) //Console-1
 
 if (update.connection == "open" || update.receivedPendingNotifications == "true") {
 console.clear()
-say(`Hello There Welcome To My Script
+say(`💠 Welcome to FlowFalcon~Project 💠
 ===========================================
-   • Script    : FlowFalcon~Project
-   • Developer : FlowFalcon 
-   • Version   : 3.2
-   • Type      : Free
+   🔹 Script     : FlowFalcon~Project  
+   🔹 Developer  : FlowFalcon  
+   🔹 Version    : 3.5  
+   🔹 Type       : Free  
 ===========================================
-Script ini gratis dan bisa di dapatkan 
-di group / channel WhatsApp kami`, {
+📌 Nantikan Informasi Update Script Terbaru
+   Di Grup & Channel WhatsApp Kami.
+
+🔗 Group Chat : flowfalcon.xyz/group/  
+🔗 Channel    : flowfalcon.xyz/channel/  
+
+===========================================\n`, {
 font: 'console',
 align: 'left',
 gradient: [randomcolor, randomcolor]
@@ -403,7 +405,7 @@ console.log(err)
 async function getJadwalSholat(cityId) {
     try {
         let date = moment().format("YYYY-MM-DD");
-        let { data } = await axios.get(`https://rest.cloudkuimages.xyz/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
+        let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
 
         if (data.status !== 200 || !data.result) return null;
         

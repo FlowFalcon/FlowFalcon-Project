@@ -3,6 +3,7 @@ const chalk = require('chalk')
 //=================================================//
 // setting bot
 global.namaowner = "FlowFalcon"
+global.ownernumber = "6287740310396"
 global.namabot = "Falcon"
 global.packname = "dibuat oleh FlowFalcon"
 global.author = "6287740310396"
@@ -10,8 +11,14 @@ global.idSaluran = "120363329290204598@newsletter"
 global.anticall = false
 global.autotyping = false
 global.autoread = true
-global.antispam = true
-
+global.images = [
+"https://img86.pixhost.to/images/588/564679523_media.jpg",
+"https://img86.pixhost.to/images/588/564679589_media.jpg",
+"https://img86.pixhost.to/images/588/564679622_media.jpg",
+"https://img86.pixhost.to/images/588/564679679_media.jpg",
+"https://img86.pixhost.to/images/588/564679710_media.jpg",
+"https://img86.pixhost.to/images/588/564679716_media.jpg"
+]
 // Settings Api Panel Pterodactyl
 global.egg = "15" // Egg ID
 global.nestid = "5" // nest ID
