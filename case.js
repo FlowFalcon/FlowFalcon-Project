@@ -314,7 +314,7 @@ forwarsingScore: 999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName: `© ${global.namaowner}- 2025`,
+newsletterName: `© ${global.namaowner} - 2025`,
 }
 }
 })
@@ -402,7 +402,7 @@ forwardingScore: 9999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName:`© ${global.namaowner}- 2025`,
+newsletterName:`© ${global.namaowner} - 2025`,
 }
 }
 }, {
@@ -486,7 +486,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: `© ${global.namaowner}- 2025`,
+footer: `© ${global.namaowner} - 2025`,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${budy}`,
@@ -876,7 +876,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: menu,
-footer: `\n© ${global.namaowner}- 2025`,
+footer: `\n© ${global.namaowner} - 2025`,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -886,7 +886,7 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: `© ${global.namaowner}- 2025`,
+title: `© ${global.namaowner} - 2025`,
 body: "Asistent Virtual"
 },
 },
@@ -1140,7 +1140,7 @@ _Gausah malu untuk join karena Isi member-nya ramah-ramah loh_
 
 sudah deh itu aja yang mau aku sampaikan silahkan gunakan fitur kami dengan bijak yah 😉 
 `,
-footer: `© ${global.namaowner}- 2025`,
+footer: `© ${global.namaowner} - 2025`,
 buttons: [
 {
 buttonId: `${prefix}allmenu`,
@@ -2272,7 +2272,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: `© ${global.namaowner}- 2025`,
+footer: `© ${global.namaowner} - 2025`,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${text}`,
