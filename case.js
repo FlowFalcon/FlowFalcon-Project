@@ -1747,34 +1747,43 @@ author: author
 })
 }
 break
-case 'tourl': case 'nurl': {
-    if (!m.quoted) return reply("❌ *Reply file atau gambar yang mau di-upload!*");
-
-    let mime = m.quoted.mimetype || "";
-    if (!/image|video|audio|document/.test(mime)) return reply("❌ *Format file tidak didukung!*");
-
-    let media = await falcon.downloadAndSaveMediaMessage(m.quoted);
-    let form = new FormData();
-    form.append('file', fs.createReadStream(media));
-
+case 'tourl': {
+    if (!m.quoted) return m.reply("🚨 Reply media atau teks yang ingin diunggah!");
+    
     try {
-        let { data } = await axios.post('https://cloudkuimages.com/upload', form, {
-            headers: { ...form.getHeaders() }
-        });
+        const { uploadFile } = require('cloudku-uploader');
+        const { Buffer } = require('buffer');
 
-        if (data.status === 'success') {
-            reply(`✅ *File berhasil diunggah!*\n📎 *URL:* ${data.file_url}`);
+        let q = m.quoted;
+        let mime = (q.msg || q).mimetype || '';
+        let fileBuffer, fileName;
+
+        if (mime) {
+            fileBuffer = await q.download();
+            let ext = mime.split('/')[1] || 'bin';
+            fileName = `upload.${ext}`;
+        } else if (q.text) {
+            fileBuffer = Buffer.from(q.text, 'utf-8');
+            fileName = 'upload.txt';
         } else {
-            reply(`❌ *Gagal upload!* ${data.message}`);
+            return m.reply("🚨 Tidak ada media atau teks yang ditemukan!");
         }
-    } catch (err) {
-        console.error("❌ Error upload:", err);
-        reply("❌ *Terjadi kesalahan saat upload! Coba lagi nanti.*");
-    }
 
-    fs.unlinkSync(media);
+        await m.reply("⏳ Mengupload file ke CloudkuImages...");
+        console.log(`🚀 Mengupload file ${fileName}...`);
+        const result = await uploadFile(fileBuffer, fileName);
+
+        if (result.status === "success") {
+            return m.reply(`✅ *File berhasil diunggah!*\n\n📮 *L I N K :* ${result.url}\n📂 *File Name :* ${result.fileName}\n📊 *S I Z E :* ${result.Size} Byte\n📛 *T Y P E :* ${result.type}`);
+        } else {
+            return m.reply(`🚨 Gagal mengupload file! Server response: ${JSON.stringify(result)}`);
+        }
+    } catch (e) {
+        console.error(e);
+        return m.reply("🚨 Terjadi kesalahan saat mengupload file!");
+    }
 }
-break;    
+break   
 
 case "tourl2": case 'nurl2': {
     if (!m.quoted) return reply("❌ *Reply file atau gambar yang mau di-upload!*");
@@ -2159,16 +2168,15 @@ case 'yta': {
 
     try {  
         await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
-
-        let response = await fetch(`https://rest.cloudkuimages.com/api/download/ytmp3?url=${encodeURIComponent(url)}`);
+        let response = await fetch(`https://api.hiuraa.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=mp3`);
         let result = await response.json();
 
         if (!result.status) return m.reply('❌ Gagal mendapatkan audio.');
 
         await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
 
-        let { metadata } = result;
-        let captionInfo = `🎵 *${metadata.title}*\n👤 *Author:* ${metadata.author}\n🔗 *Bitrate:* ${metadata.bitrate}kbps`;
+        let { result: metadata } = result;
+        let captionInfo = `🎵 *${metadata.title}*\n⏱️ *Duration:* ${metadata.duration}\n🔗 *Bitrate:* ${metadata.quality}kbps`;
 
         await falcon.sendMessage(m.chat, {
             image: { url: metadata.thumbnail || '' },
@@ -2178,7 +2186,7 @@ case 'yta': {
         await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
 
         await falcon.sendMessage(m.chat, { 
-            audio: { url: metadata.download_url },
+            audio: { url: metadata.download },
             mimetype: 'audio/mp4',
             fileName: `${metadata.title}.mp3`
         }, { quoted: m });
@@ -2196,22 +2204,26 @@ case 'xytmp4':
 case 'ytmp4':   
 case 'ytvideo':   
 case 'ytv': {  
-    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>`);  
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>,<resolusi>\n\nContoh:\n${prefix + command} https://youtu.be/abc123,720`);  
 
-    let url = args[0];
+    let [url, res] = text.split(',');
+    res = res ? res.trim() : '360';
+
+    const validRes = ['144', '240', '360', '480', '720', '1080'];
+    if (!validRes.includes(res)) return m.reply(`❌ Resolusi tidak valid!\nGunakan: ${validRes.join(', ')}.`);
 
     try {  
         await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
 
-        let response = await fetch(`https://rest.cloudkuimages.com/api/download/ytmp4?url=${encodeURIComponent(url)}`);
+        let response = await fetch(`https://api.hiuraa.my.id/downloader/savetube?url=${encodeURIComponent(url)}&format=${res}`);
         let result = await response.json();
 
         if (!result.status) return m.reply('❌ Gagal mendapatkan video.');
 
         await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
 
-        let { metadata } = result;
-        let captionInfo = `📹 *${metadata.title}*\n👤 *Author:* ${metadata.author}\n📡 *Resolusi:* ${metadata.resolution}p`;
+        let { result: metadata } = result;
+        let captionInfo = `📹 *${metadata.title}*\n⏱️ *Durasi:* ${metadata.durationr}\n📡 *Resolusi:* ${metadata.quality}p`;
 
         await falcon.sendMessage(m.chat, {
             image: { url: metadata.thumbnail || '' },
