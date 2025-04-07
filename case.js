@@ -1,3 +1,7 @@
+/*
+Maaf ya ges jadi kurang rapih karena kesalahan dari saya sendiri :)
+banyak yang harus di hapus dan di tambah
+*/
 require('./config')
 const { 
 BufferJSON,
@@ -43,11 +47,13 @@ const util = require('util')
 const gtts = require("node-gtts");
 const ytdl = require('@vreden/youtube_scraper')
 const yts = require("yt-search")
-const { validateUser, registerUser } = require('flowfalcon-security');
 const { promisify } = require('util');
 const getFileSize = promisify(fs.stat);
 const https = require('https');
-//==================================================//
+const { createCanvas, loadImage } = require('canvas');
+const puppeteer = require('puppeteer');
+const bwipjs = require('bwip-js');
+//==========================================//
 module.exports = falcon = async (falcon, m, chatUpdate, mek, store) => {
 try {
 const {
@@ -156,7 +162,7 @@ var body = (m.mtype === 'interactiveResponseMessage')
 : "";
 var budy = (typeof m.text == 'string' ? m.text : '')
 //==================================================//
-const prefa = ['.', '/', '!'];
+const prefa = ['.', '/', '!', '$'];
 const prefix = prefa.find(p => body.startsWith(p)) || '.';
 const isCmd = body.startsWith(prefix);
 const command = isCmd ? body.slice(prefix.length).trim().split(/ +/).shift().toLowerCase() : '';
@@ -189,18 +195,17 @@ const owner = global.ownernumber
 const own = JSON.parse(fs.readFileSync('./data/owner.json').toString())
 const premium = fs.readFileSync('./data/premium.json').toString()
 const prem = JSON.parse(fs.readFileSync('./data/premium.json').toString())
-const banned = fs.readFileSync('./data/banned.json').toString()
-const ban = JSON.parse(fs.readFileSync('./data/banned.json').toString())
 const isOwner = [owner, ...own].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
 const isPremium = isOwner ? true : [premium, ...prem].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
-const isBan = isOwner ? false : [banned, ...ban].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
-const gcban = JSON.parse(fs.readFileSync('./data/gcban.json'))
-const isBanGroup = (chatId) => {
-    return gcban.includes(chatId.replace(/[^0-9]/g, '') + '@g.us')
-}
 const _afk = JSON.parse(fs.readFileSync('./data/afk.json'))
 const afk = require("./lib/general/afk")
 const isAfkOn = afk.checkAfkUser(m.sender, _afk)
+const banned = JSON.parse(fs.readFileSync('./data/banned.json'))
+const isBan = (id) => {
+    const fullId = id.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
+    return banned.includes(fullId)
+}
+
 //==================================================//
 const args = body.trim().split(/ +/).slice(1)
 const text = q = args.join(" ")
@@ -240,8 +245,7 @@ const falconimg = getRandomImage()
 //==================================================//
 const uploadFile = {
 upload: falcon.waUploadToServer
-}
-//==================================================//
+}//==================================================//
 const { exec } = require('child_process');
 const path = require('path');
 const fetch = require('node-fetch');
@@ -314,7 +318,7 @@ forwarsingScore: 999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName: `© ${global.namaowner} - 2025`,
+newsletterName: `© ${global.nameonwer} - 2025`,
 }
 }
 })
@@ -402,7 +406,7 @@ forwardingScore: 9999999,
 isForwarded: true,
 forwardedNewsletterMessageInfo: {
 newsletterJid: idSaluran,
-newsletterName:`© ${global.namaowner} - 2025`,
+newsletterName: `© ${global.nameonwer} - 2025`,
 }
 }
 }, {
@@ -419,6 +423,53 @@ key: m.key
 }
 })
 }
+//=================================================//
+const DakggGenshin = async (id) => {
+    try {
+        const url = `https://r.jina.ai/https://genshin.dakgg.io/roles/${id}`;
+        const response = await fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Return-Format': 'application/json',
+                'Accept': 'application/json'
+            }
+        });
+
+        if (!response.ok) throw new Error(`HTTP Error! Status: ${response.status}`);
+
+        const json = await response.json();
+        console.log("Raw API Response:", json); // Debug log
+
+        if (!json.data || !json.data.content) throw new Error("Invalid API response format");
+
+        const parsedData = JSON.parse(json.data.content.replace(/\\/g, ''));
+        console.log("Parsed Data:", parsedData); // Debug log
+
+        return parsedData;
+    } catch (error) {
+        console.error("Error fetching Dakgg data:", error);
+        return null;
+    }
+};
+
+//==================================================//
+if (budy.startsWith('kntl', 'goblok', 'kontol', 'gblk', 'kntol', 'tolol', 'tlol', 'pea', 'ytm', 'yatim', 'yteam', 'ytim', 'lawak', 'memek', 'mmk', 'mmek', 'anj', 'ajg', 'anjg', 'anjing', 'anjink', 'lonte', 'ngentod', 'ngentot', 'ngewe', 'ngtd', 'ngntd', 'pepek', 'ppk', 'ppek', 'jomok', 'gila', 'asu', 'lonte', 'anjgg')) {
+if (!isGroup) return
+if (isOwner) return
+if (!isBotAdmins) return m.reply(`lu lebih ${budy}`)
+if (sender == botNumber) return
+m.reply("Allah tidak menyukai perkataan buruk, yang diucapkan secara terus terang kecuali oleh orang yang dizalimi. Dan Allah Maha mendengar, Maha mengetahui\n*QS. An-Nisa: 148*")
+falcon.sendMessage(m.chat, {
+delete: {
+remoteJid: m.chat,
+fromMe: false,
+id: m.key.id,
+participant: m.key.participant
+}
+})
+await falcon.groupParticipantsUpdate(m.chat, [sender], 'delete')
+}
+
 //==================================================//
 async function tiktok(url) {
 try {
@@ -466,49 +517,6 @@ console.error(error)
 }
 }
 
-if (budy.startsWith('https://vt.tiktok.com/') || budy.startsWith('https://www.tiktok.com/') || budy.startsWith('https://t.tiktok.com/') || budy.startsWith('https://vm.tiktok.com/')) {
-try {
-const {
-isSlide,
-result,
-title,
-author
-} = await tiktok(budy)
-let no = 1
-if (isSlide == true) {
-if (isGroup) return reply('Terdeteksi url tiktok slide\nFoto dikirim ke chat pribadi')
-let cap = `乂 *TIKTOK SLIDE*\n\n`
-for (let img of result) {
-falcon.sendMessage(sender, {
-image: await fetchBuffer(img)
-})
-}
-} else if (isSlide == false) {
-falcon.sendMessage(m.chat, {
-text: "Silahkan pilih sesuai keinginan Anda",
-footer: `© ${global.namaowner} - 2025`,
-buttons: [
-{
-buttonId: `${prefix}tiktokmp4 ${budy}`,
-buttonText: { 
-displayText: 'Video 🎥' 
-}
-}, {
-buttonId: `${prefix}tiktokmp3 ${budy}`,
-buttonText: {
-displayText: "Audio 🎵"
-}
-}
-],
-viewOnce: true
-}, {
-quoted: m
-})
-}
-} catch (error) {
-reaction("❌")
-}
-}
 //==================================================//
 //==================================================//
 if (m.isGroup && !m.key.fromMe) {
@@ -540,9 +548,21 @@ fs.writeFileSync("./data/afk.json", JSON.stringify(_afk))
 reply(`@${m.sender.split("@")[0]} telah kembali dari *AFK*\n\n*Alasan* : ${getReason}`)
 }
 }
+//=================================================//
 
-if (isCmd && !isOwner && isBanGroup(m.chat)) {
-    return
+const USER_FILE = "./data/user.json";
+let userDB = fs.existsSync(USER_FILE) ? JSON.parse(fs.readFileSync(USER_FILE)) : {};
+
+function saveUserDB() {
+    fs.writeFileSync(USER_FILE, JSON.stringify(userDB, null, 2));
+}
+function isRegistered(jid) {
+    return jid in userDB;
+}
+if (isCmd && !body.startsWith(prefix + "daftar")) {
+    if (!isRegistered(m.sender)) {
+        return m.reply(`⚠️ Kamu belum terdaftar!\n\nGunakan:\n.daftar nama,umur,asal`);
+    }
 }
 //==================================================//
 if (isCmd && m.isGroup) {
@@ -553,8 +573,47 @@ if (isCmd && !isGroup) {
 console.log(chalk.bold.rgb(255, 178, 102)('\x1b[1;31m~\x1b[1;37m> [\x1b[1;32mCMD\x1b[1;37m]'), chalk.bold.rgb(153, 255, 153)(command), chalk.bold.rgb(204, 204, 0)("from"), chalk.bold.rgb(153, 255, 204)(pushname), chalk.bold.rgb(204, 204, 0)("in"), chalk.bold.rgb(255, 178, 102)("Private Chat"), chalk.bold('[' + args.length + ']'))
 }
 //==================================================//
+const eventDB = "./Event.json";
 
- //=========================================================//
+// Fungsi untuk membaca database event
+function loadEvent() {
+  if (!fs.existsSync(eventDB)) {
+    return { active: false, name: "", participants: [] };
+  }
+  try {
+    return JSON.parse(fs.readFileSync(eventDB, "utf-8"));
+  } catch (err) {
+    console.error("Error membaca database event:", err);
+    return { active: false, name: "", participants: [] };
+  }
+}
+
+// Fungsi untuk menyimpan database event
+function saveEvent(data) {
+  try {
+    fs.writeFileSync(eventDB, JSON.stringify(data, null, 2));
+  } catch (err) {
+    console.error("Error menyimpan database event:", err);
+  }
+}    
+//=================================================//
+ //================================================================================
+
+const parseDuration = (text) => {
+    let match = text.match(/^(\d+)([smhd])$/);
+    if (!match) return null;
+    let value = parseInt(match[1]);
+    let unit = match[2];
+
+    switch (unit) {
+        case 's': return value * 1000;       // detik ke milidetik
+        case 'm': return value * 60000;      // menit ke milidetik
+        case 'h': return value * 3600000;    // jam ke milidetik
+        case 'd': return value * 86400000;   // hari ke milidetik
+        default: return null;
+    }
+};
+ //=================================================//
 async function remini(urlPath, method) {
 return new Promise(async (resolve, reject) => {
 let Methods = ["enhance", "recolor", "dehaze"]
@@ -601,39 +660,48 @@ reject()
 }
 //=================================================//
 async function cariGC(query) {
-try {
-const { data } = await axios.get(`https://groupsor.link/group/searchmore/${query.replace(/ /g, '-')}`);
-const $ = cheerio.load(data);
-const result = [];
-$('.maindiv').each((i, el) => {
-result.push({
-title: $(el).find('img').attr('alt')?.trim(),
-thumb: $(el).find('img').attr("src")?.trim(),
-});
-});
+    try {
+        const { data } = await axios.get(`https://groupsor.link/group/searchmore/${query.replace(/ /g, '-')}`);
+        const $ = cheerio.load(data);
+        const result = [];
 
-$('div.post-info-rate-share > .joinbtn').each((i, el) => {
-if (result[i]) {
-result[i].link = $(el).find('a').attr("href")?.trim().replace('https://groupsor.link/group/join/', 'https://chat.whatsapp.com/');
-}
-});
-$('.post-info').each((i, el) => {
-if (result[i]) {
-result[i].desc = $(el).find('.descri').text()?.replace('... continue reading', '.....').trim();
-}
-});
-return result;
-} catch (e) {
-console.log(e);
-return [];
-}
+        $('.maindiv').each((i, el) => {
+            result.push({
+                title: $(el).find('img').attr('alt')?.trim(),
+                thumb: $(el).find('img').attr("src")?.trim(),
+            });
+        });
+
+        $('div.post-info-rate-share > .joinbtn').each((i, el) => {
+            if (result[i]) {
+                result[i].link = $(el).find('a').attr("href")?.trim().replace('https://groupsor.link/group/join/', 'https://chat.whatsapp.com/');
+            }
+        });
+
+        $('.post-info').each((i, el) => {
+            if (result[i]) {
+                result[i].desc = $(el).find('.descri').text()?.replace('... continue reading', '.....').trim();
+            }
+        });
+
+        return result;
+    } catch (e) {
+        console.log(e);
+        return [];
+    }
 }
 //==================================================//
 const configPath = './lib/groupConfig.json';
 
 function loadConfig() {
-if (!fs.existsSync(configPath)) fs.writeFileSync(configPath, "{}");
-return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  if (!fs.existsSync(configPath)) fs.writeFileSync(configPath, "{}");
+  try {
+    return JSON.parse(fs.readFileSync(configPath, 'utf-8'));
+  } catch (e) {
+    console.error("❌ Gagal parsing config, reset ke default!");
+    fs.writeFileSync(configPath, "{}");
+    return {};
+  }
 }
 
 function saveConfig(config) {
@@ -641,181 +709,110 @@ function saveConfig(config) {
 }
 
 function ensureGroupConfig(groupId) {
-let config = loadConfig();
-if (!config[groupId]) {
-config[groupId] = {
-welcome: false,
-message: "Selamat datang @user di @grup!\n\n@desk",
-buttons: [
-{ "buttonId": ".intro", "buttonText": "Perkenalan" },
-{ "buttonId": ".rules", "buttonText": "Aturan" }
-],
-rules: "📌 Tidak ada peraturan yang ditetapkan!",
-intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:",
-jadwalSholat: {
-aktif: false,
-cityId: "",
-},
-jadwalPuasa: {
-aktif: false
-}
-};
-saveConfig(config);
-}
+  let config = loadConfig();
+  if (!config[groupId]) {
+    config[groupId] = {
+      welcome: false,
+      message: "Selamat datang @user di @grup!\n\n@desk",
+      buttons: [
+        { buttonId: ".intro", buttonText: "Perkenalan" },
+        { buttonId: ".rules", buttonText: "Aturan" }
+      ],
+      rules: "📌 Tidak ada peraturan yang ditetapkan!",
+      intro: "📌 Silakan isi perkenalan:\n- Nama:\n- Umur:\n- Hobi:",
+    };
+    saveConfig(config);
+  }
 }
 //=================================================//
 const headers = {
-'Referer': 'https://www.pixiv.net/',
-'Accept-Encoding': 'gzip, deflate, br'
+    'Referer': 'https://www.pixiv.net/',
+    'Accept-Encoding': 'gzip, deflate, br'
 };
+
 async function pixiv(query) {
-let { data } = await axios.get(`https://www.pixiv.net/touch/ajax/tag_portal?word=${query}&lang=en&version=892d65fef9e1fc4efa5a1fd1c4675d6ae3e73835`, { headers })
-return data.body.illusts
+    let { data } = await axios.get(`https://www.pixiv.net/touch/ajax/tag_portal?word=${query}&lang=en&version=892d65fef9e1fc4efa5a1fd1c4675d6ae3e73835`, { headers })
+    return data.body.illusts
 }
+
+
 async function getBuff(url) {
-let { data } = await axios.get(url, { 
-headers: {
-'Referer': 'https://www.pixiv.net/',
-'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
-}, 
-responseType: 'arraybuffer' 
-})
-return data
-}
-//=================================================//
-async function getCookies() {
-    try {
-        const response = await axios.get('https://www.pinterest.com/csrf_error/');
-        const setCookieHeaders = response.headers['set-cookie'];
-        if (setCookieHeaders) {
-            const cookies = setCookieHeaders.map(cookieString => {
-                const cookieParts = cookieString.split(';');
-                const cookieKeyValue = cookieParts[0].trim();
-                return cookieKeyValue;
-            });
-            return cookies.join('; ');
-        } else {
-            console.warn('No set-cookie headers found in the response.');
-            return null;
-        }
-    } catch (error) {
-        console.error('Error fetching cookies:', error);
-        return null;
-    }
-}
-
-async function pinterest(query) {
-    try {
-        const cookies = await getCookies();
-        if (!cookies) {
-            console.log('Failed to retrieve cookies. Exiting.');
-            return;
-        }
-
-        const url = 'https://www.pinterest.com/resource/BaseSearchResource/get/';
-
-        const params = {
-            source_url: `/search/pins/?q=${query}`,
-            data: JSON.stringify({
-                "options": {
-                    "isPrefetch": false,
-                    "query": query,
-                    "scope": "pins",
-                    "no_fetch_context_on_resource": false
-                },
-                "context": {}
-            }),
-            _: Date.now()
-        };
-
-        const headers = {
-            'accept': 'application/json, text/javascript, */*, q=0.01',
-            'accept-encoding': 'gzip, deflate',
-            'accept-language': 'en-US,en;q=0.9',
-            'cookie': cookies,
-            'dnt': '1',
-            'referer': 'https://www.pinterest.com/',
-            'sec-ch-ua': '"Not(A:Brand";v="99", "Microsoft Edge";v="133", "Chromium";v="133"',
-            'sec-ch-ua-full-version-list': '"Not(A:Brand";v="99.0.0.0", "Microsoft Edge";v="133.0.3065.92", "Chromium";v="133.0.6943.142"',
-            'sec-ch-ua-mobile': '?0',
-            'sec-ch-ua-model': '""',
-            'sec-ch-ua-platform': '"Windows"',
-            'sec-ch-ua-platform-version': '"10.0.0"',
-            'sec-fetch-dest': 'empty',
-            'sec-fetch-mode': 'cors',
-            'sec-fetch-site': 'same-origin',
-            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36 Edg/133.0.0.0',
-            'x-app-version': 'c056fb7',
-            'x-pinterest-appstate': 'active',
-            'x-pinterest-pws-handler': 'www/[username]/[slug].js',
-            'x-pinterest-source-url': '/hargr003/cat-pictures/',
-            'x-requested-with': 'XMLHttpRequest'
-        };
-
-        const { data } = await axios.get(url, {
-            headers: headers,
-            params: params
-        })
-
-        const container = [];
-        const results = data.resource_response.data.results.filter((v) => v.images?.orig);
-        results.forEach((result) => {
-            container.push({
-                upload_by: result.pinner.username,
-                fullname: result.pinner.full_name,
-                followers: result.pinner.follower_count,
-                caption: result.grid_title,
-                image: result.images.orig.url,
-                source: "https://id.pinterest.com/pin/" + result.id,
-            });
-        });
-
-        return container;
-    } catch (error) {
-        console.log(error);
-        return [];
-    }
+    let { data } = await axios.get(url, { 
+        headers: {
+            'Referer': 'https://www.pixiv.net/',
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
+        }, 
+        responseType: 'arraybuffer' 
+    })
+    return data
 }
 //=================================================//
 async function getListKota() {
-try {
-let { data } = await axios.get("https://rest.cloudkuimages.com/api/muslim/listkota");
-if (!data || !data.result) return null;
-return data.result;
-} catch (error) {
-console.error("Error mengambil daftar kota:", error);
-return null;
-}
+    try {
+        let { data } = await axios.get("https://rest.cloudkuimages.com/api/muslim/listkota");
+        if (!data || !data.result) return null;
+        return data.result; // Return array daftar kota
+    } catch (error) {
+        console.error("Error mengambil daftar kota:", error);
+        return null;
+    }
 }
 async function getJadwalSholat(cityId) {
-let date = new Date().toISOString().split('T')[0];
-try {
-let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
-if (!data || !data.result) return null;
-return {
-lokasi: data.result.lokasi,
-daerah: data.result.daerah,
-timezone: "Asia/Jakarta", 
-imsak: data.result.jadwal.imsak,
-subuh: data.result.jadwal.subuh,
-dzuhur: data.result.jadwal.dzuhur,
-ashar: data.result.jadwal.ashar,
-maghrib: data.result.jadwal.maghrib,
-isya: data.result.jadwal.isya
-};
-} catch (error) {
-console.error("Error mengambil jadwal sholat:", error);
-return null;
-}
+    let date = new Date().toISOString().split('T')[0]; // Ambil tanggal hari ini
+
+    try {
+        let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
+        if (!data || !data.result) return null;
+
+        return {
+            lokasi: data.result.lokasi,
+            daerah: data.result.daerah,
+            timezone: "Asia/Jakarta", 
+            imsak: data.result.jadwal.imsak,
+            subuh: data.result.jadwal.subuh,
+            dzuhur: data.result.jadwal.dzuhur,
+            ashar: data.result.jadwal.ashar,
+            maghrib: data.result.jadwal.maghrib,
+            isya: data.result.jadwal.isya
+        };
+    } catch (error) {
+        console.error("Error mengambil jadwal sholat:", error);
+        return null;
+    }
 }
 //=================================================//
 const SESSION_FILE = "./session/ai_sessions.json";
+const DEFAULT_MODEL = "@google/gemini-1.5-flash";
+const availableModels = [
+    "@google/gemini-1.5-flash",
+    "@google/gemini-1.5-flash-8b",
+    "@google/gemini-1.5-pro",
+    "@google/gemini-2.0-flash",
+    "@google/gemini-2.0-flash-lite-preview-02-05",
+    "@google/gemini-2.0-pro-exp-02-05",
+    "@groq/gemma2-9b-it",
+    "@groq/qwen-2.5-32b",
+    "@mistral/mistral-small-latest",
+    "@mistral/mistral-large-latest",
+    "@mistral/mistral-moderation-latest",
+    "@mistral/open-mistral-nemo",
+    "@mistral/mistral-saba-latest",
+    "@hf/thebloke/deepseek-coder-6.7b-instruct-awq",
+    "@together/deepseek-ai/DeepSeek-V3",
+    "@groq/deepseek-r1-distill-llama-70b",
+    "@groq/llama-3.1-8b-instant",
+    "@groq/llama-3.3-70b-versatile",
+    "@custom/hoshinoo-ba-idn.lang",
+    "@custom/hertaa-hsr-idn.lang",
+    "@custom/zetaa-holoid-idn.lang"
+];
 
 let sessions = fs.existsSync(SESSION_FILE) ? JSON.parse(fs.readFileSync(SESSION_FILE)) : {};
 
 function saveSession() {
     fs.writeFileSync(SESSION_FILE, JSON.stringify(sessions, null, 2));
 }
+//=================================================//
 const CAI_DB = "./session/cai_users.json";
 
 let cai_users = fs.existsSync(CAI_DB) ? JSON.parse(fs.readFileSync(CAI_DB)) : {};
@@ -823,17 +820,20 @@ function saveCaiDB() {
     fs.writeFileSync(CAI_DB, JSON.stringify(cai_users, null, 2));
 }
 //=================================================//
+const savetube = require("./lib/general/savetube");
 const getFileSizeFromUrl = async (url) => {
-try {
-let response = await fetch(url, { method: 'HEAD' });
-return response.headers.get('content-length') || 0;
-} catch (err) {
-console.error('Error fetching file size:', err);
-return 0;
-}
+    try {
+        let response = await fetch(url, { method: 'HEAD' });
+        return response.headers.get('content-length') || 0;
+    } catch (err) {
+        console.error('Error fetching file size:', err);
+        return 0;
+    }
 };
 //=================================================//
-
+if (isBan(m.sender)) {
+    return 
+}
 if (isCmd && autotyping) {
 if (command) { falcon.readMessages([m.key])}
 falcon.sendPresenceUpdate('composing', from)
@@ -848,7 +848,7 @@ switch (command) {
 case 'help':
 case 'menu':
 case 'menu-v2': {
-if (isBan) return
+
 let menu = `Hai Kak ${pushname} 👋
 *Perkenalkan Saya Adalah Bot Asisten Virtual Yang Di Rancang Oleh Seorang Developer Untuk Memudahkan Urusan Dalam Kehidupan sehari-hari*
 
@@ -876,7 +876,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: menu,
-footer: `\n© ${global.namaowner} - 2025`,
+footer: `© ${global.nameonwer} - 2025`,,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -886,7 +886,7 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: `© ${global.namaowner} - 2025`,
+title: `© ${global.nameonwer} - 2025`,,
 body: "Asistent Virtual"
 },
 },
@@ -906,8 +906,8 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: `© ${global.namaowner} - 2025`,
-highlight_label: `${global.namaowner}`,
+title: `© ${global.nameonwer} - 2025`,,
+highlight_label: "FlowFalcon",
 rows: [{
 title: "allmenu",
 description: "menampilkan semua menu",
@@ -938,7 +938,7 @@ break
 
 case 'allmenu':
 case 'allmenu-v2': {
-if (isBan) return
+
 let allmenu = `Halo *${pushname} 👋🏻*
 
 - 𝗜𝗡𝗙𝗢 𝗨𝗦𝗘𝗥
@@ -971,8 +971,11 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}bratimg
 ▢ ${prefix}bratvid
 ▢ ${prefix}animebrat
+▢ ${prefix}animebrat2
+▢ ${prefix}animebrat-vid
 ▢ ${prefix}sticker
 ▢ ${prefix}qc
+▢ ${prefix}smeme
 
 - 𝗚𝗥𝗢𝗨𝗣
 ▢ ${prefix}add
@@ -980,13 +983,13 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}hidetag
 ▢ ${prefix}totag
 ▢ ${prefix}setwelcome
-▢ ${prefix}puasa
 ▢ ${prefix}setjadwal
-▢ ${prefix}setpuasa
-▢ ${prefix}matikanpuasa
-▢ ${prefix}matikanjadwal
 ▢ ${prefix}listkota
 ▢ ${prefix}cekjadwal
+▢ ${prefix}open
+▢ ${prefix}close
+▢ ${prefix}group <open/close>
+▢ ${prefix}event
 
 - 𝗗𝗢𝗪𝗡𝗟𝗢𝗔𝗗
 ▢ ${prefix}tiktok
@@ -994,8 +997,16 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}pinterest
 ▢ ${prefix}ytmp3
 ▢ ${prefix}ytmp4
+▢ ${prefix}yta
+▢ ${prefix}ytv
+▢ ${prefix}yt (8k)
+▢ ${prefix}igmp3
+▢ ${prefix}igmp4
+▢ ${prefix}ig (4k)
 ▢ ${prefix}nhentaidl
 ▢ ${prefix}spotifydl
+▢ ${prefix}terabox
+▢ ${prefix}mediafire
 
 - 𝗣𝗟𝗔𝗬
 ▢ ${prefix}spotify
@@ -1016,12 +1027,19 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}cekidch
 ▢ ${prefix}cekidgc
 ▢ ${prefix}whatanime
+▢ ${prefix}convert
 
 - 𝗔𝗜
 ▢ ${prefix}autoai
+▢ ${prefix}setmodel
 ▢ ${prefix}cai
 ▢ ${prefix}caisearch
 ▢ ${prefix}setcai
+▢ ${prefix}gemini
+▢ ${prefix}copilot
+▢ ${prefix}hytam
+▢ ${prefix}aiimage
+▢ ${prefix}ai
 
 - 𝗜𝗦𝗟𝗔𝗠𝗜𝗖 𝗠𝗘𝗡𝗨
 ▢ ${prefix}surah
@@ -1034,11 +1052,14 @@ Status : *${isOwner ? "Owner" : isPremium ? "Premium" : "Free"}*
 ▢ ${prefix}1 - 10gb
 ▢ ${prefix}delpanel
 ▢ ${prefix}deladmin
-▢ ${prefix}buatpanel-v2
-▢ ${prefix}cadmin-v2
-▢ ${prefix}1 - 10gb2
-▢ ${prefix}delpanel-v2
-▢ ${prefix}deladmin-v2
+
+𝗔𝗡𝗢𝗧𝗛𝗘𝗥 𝗖𝗢𝗠𝗠𝗔𝗡𝗗
+▢ ${prefix}regis
+▢ ${prefix}adddb
+▢ ${prefix}adduser
+▢ ${prefix}chek-user
+▢ ${prefix}chat-ch
+▢ ${prefix}get / feact
 
 `
 const buttons = [
@@ -1062,7 +1083,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: allmenu,
-footer: global.namaowner,
+footer: `© ${global.nameonwer} - 2025`,,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -1072,8 +1093,8 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: `© ${global.namaowner} - 2025`,
-body: `${global.namaowner}`
+title: `© ${global.nameonwer} - 2025`,,
+body: "FlowFalcon Project"
 },
 },
 viewOnce: true,
@@ -1092,8 +1113,8 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: `© ${global.namaowner} - 2025`,
-highlight_label: `${global.namaowner}`,
+title: `© ${global.nameonwer} - 2025`,,
+highlight_label: "FlowFalcon",
 rows: [{
 title: "menu",
 description: "kembali ke menu awal",
@@ -1140,7 +1161,7 @@ _Gausah malu untuk join karena Isi member-nya ramah-ramah loh_
 
 sudah deh itu aja yang mau aku sampaikan silahkan gunakan fitur kami dengan bijak yah 😉 
 `,
-footer: `© ${global.namaowner} - 2025`,
+footer: `© ${global.nameonwer} - 2025`,,
 buttons: [
 {
 buttonId: `${prefix}allmenu`,
@@ -1170,8 +1191,8 @@ var contact = generateWAMessageFromContent(m.chat, proto.Message.fromObject({
 "vcard": `BEGIN:VCARD
 VERSION:3.0
 N:;;;;
-FN: ${global.namaowner} 
-item1.TEL;waid=${global.author}:+${global.author}
+FN: ${global.nameonwer} 
+item1.TEL;waid=${global.ownernumber}:+${global.ownernumber}
 item1.X-ABLabel:Ponsel
 X-WA-BIZ-DESCRIPTION: JANGAN DI SPAM
 X-WA-BIZ-NAME:
@@ -1407,30 +1428,7 @@ quoted: m
 })
 }
 break
-case 'bangc': {
-        if (!isOwner) return
-        if (!isGroup) return reply("❌ Command ini hanya bisa digunakan di grup!")
 
-        let gcben = m.chat.replace(/[^0-9]/g, '') + '@g.us'
-        if (isBanGroup(gcben)) return reply("⚠️ Grup ini sudah dibanned!")
-
-        gcban.push(gcben)
-        fs.writeFileSync('./data/gcban.json', JSON.stringify(gcban, null, 2))
-        reply(`✅ Grup ini telah dibanned!`)
-    }
-    break
-
-    case 'unbangc': {
-        if (!isOwner) return
-        let gcbenn = m.chat.replace(/[^0-9]/g, '') + '@g.us'
-
-        if (!isBanGroup(gcbenn)) return reply("⚠️ Grup ini tidak ada dalam daftar banned!")
-
-        gcban.splice(gcban.indexOf(gcbenn), 1)
-        fs.writeFileSync('./data/gcban.json', JSON.stringify(gcban, null, 2))
-        reply(`✅ Grup ini telah di-unbanned!`)
-    }
-    break
 case 'banned': {
 if (!isOwner) return
 if (!args[0]) return reply(penggunaan("628xxx"))
@@ -1516,23 +1514,16 @@ let media = await downloadContentFromMessage(msg[type], type == 'imageMessage' ?
 break
 
 case 'eval': {
-if (!isOwner) return
-let quotedd = JSON.stringify({ [m.quoted.mtype]: m.quoted }, null, 2)
-let namafile = `Evaled_${crypto.randomBytes(8).toString('hex')}.json`
-await fs.writeFileSync(namafile, quotedd)
-await reply(quotedd)
-falcon.sendMessage(m.chat, {
-document: {
-url: `./${namafile}`
-},
-fileName: namafile, 
-mimetype: '*/*'
-}, {
-quoted: m 
-})
-await fs.unlinkSync(namafile)
+    if (!isOwner) return m.reply('⚠️ Hanya owner yang bisa pakai eval.');
+    try {
+        let result = await eval(`(async () => { ${text} })()`);
+        let output = JSON.stringify(result, null, 2);
+        m.reply(`\`\`\`${output}\`\`\``); // Kirim hasil ke WA
+    } catch (err) {
+        m.reply(`❌ Error:\n${err}`);
+    }
 }
-break
+break;
 
 case 'upsaluran': {
 if (!isOwner) return
@@ -1645,7 +1636,7 @@ try {
 let caption = `Silahkan pilih tipe yang diinginkan:\n\n1. *Gambar 🖼️*\n2. *Video 🎥*`;
 falcon.sendMessage(m.chat, {
 text: caption,
-footer: `${global.namaowner} ~ 2025`,
+footer: `${global.nameonwer}`,
 buttons: [
 {
 buttonId: `.bratimg ${text}`,
@@ -1663,28 +1654,7 @@ console.error(err);
 m.reply(`*Terjadi kesalahan!* 😭\n${err.message || err}`);
 }
 break;
-case 'animebrat': {
-    if (!text) return m.reply('Masukkan teks untuk stiker.');
 
-    try {
-        const apiUrl = `https://fastrestapis.fasturl.cloud/maker/animbrat?text=${encodeURIComponent(text)}&position=center&mode=image`;
-        let response = await fetch(apiUrl);
-        let buffer = await response.arrayBuffer();
-
-        // Konversi ke format webp
-        let webpBuffer = await sharp(Buffer.from(buffer))
-            .toFormat('webp')
-            .toBuffer();
-
-        falcon.sendMessage(m.chat, { 
-            sticker: webpBuffer 
-        }, { quoted: m });
-    } catch (e) {
-        console.error(e);
-        reply('Terjadi kesalahan saat membuat stiker.');
-    }
-}
-break;
 case 'sticker':
 case 'stiker':
 case 's':{
@@ -1710,7 +1680,7 @@ break
 
 case 'qc':
 case 'qcstick': {
-if (isBan) return
+
 if (!text) return reply(penggunaan(`falcon ganteng`))
 if (text.length > 80) return reply(`Maximal 80 karakter!`)
 let warna = ["#000000", "#ffffff"]
@@ -1747,14 +1717,72 @@ author: author
 })
 }
 break
-case 'tourl': {
-    if (!m.quoted) return m.reply("🚨 Reply media atau teks yang ingin diunggah!");
-    
-    try {
-        const { uploadFile } = require('cloudku-uploader');
-        const { Buffer } = require('buffer');
+case 'smeme': {
+    if (!m.quoted) return m.reply(`Balas gambar dengan perintah:\n${prefix + command} <teks atas>|<teks bawah>`);
 
-        let q = m.quoted;
+    const { Sticker } = require('wa-sticker-formatter');
+
+    async function uguu(filePath) {
+        try {
+            const form = new FormData();
+            form.append('files[]', fs.createReadStream(filePath));
+            const { data } = await axios.post('https://uguu.se/upload', form, {
+                headers: { ...form.getHeaders() }
+            });
+            return data.files[0].url;
+        } catch (err) {
+            throw new Error(err.message);
+        }
+    }
+
+    async function createSticker(img, url) {
+        let stickerMetadata = {
+            type: "full",
+            pack: "My Sticker",
+            author: "© "+ m.pushname,
+            quality: 100
+        };
+        return (new Sticker(img || url, stickerMetadata)).toBuffer();
+    }
+
+    let [atas, bawah] = text.split('|');
+    let q = m.quoted ? m.quoted : m;
+    let mime = (q.msg || q).mimetype || "";
+
+    if (!mime.startsWith('image/')) return m.reply("❌ Hanya bisa digunakan untuk gambar!");
+
+    await falcon.sendMessage(m.chat, { react: { text: '🖼️', key: m.key } });
+
+    let mediaBuffer = await q.download();
+    let ext = mime.split('/')[1] || "png";
+    let tempFile = path.join(__dirname, `temp_${Date.now()}.${ext}`);
+    fs.writeFileSync(tempFile, mediaBuffer);
+
+    try {
+        let url = await uguu(tempFile);
+        let memeUrl = `https://api.memegen.link/images/custom/${encodeURIComponent(atas || " ")}`
+                     + `/${encodeURIComponent(bawah || " ")}.png?background=${url}`;
+
+        let stickerBuffer = await createSticker(memeUrl, false);
+        await falcon.sendMessage(m.chat, { sticker: stickerBuffer }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan saat membuat meme.");
+    } finally {
+        fs.unlinkSync(tempFile);
+    }
+}
+break;
+case 'tourl':
+case 'nurl': {
+    try {
+        const uploadFile = require('cloudku-uploader')
+        const { Buffer } = require('buffer')
+
+        let q = m.quoted ? m.quoted : m;
         let mime = (q.msg || q).mimetype || '';
         let fileBuffer, fileName;
 
@@ -1766,25 +1794,39 @@ case 'tourl': {
             fileBuffer = Buffer.from(q.text, 'utf-8');
             fileName = 'upload.txt';
         } else {
-            return m.reply("🚨 Tidak ada media atau teks yang ditemukan!");
+            return falcon.sendMessage(m.chat, { text: '🚨 Tidak ada media atau teks yang ditemukan!' }, { quoted: m });
         }
 
-        await m.reply("⏳ Mengupload file ke CloudkuImages...");
-        console.log(`🚀 Mengupload file ${fileName}...`);
+        let loading = await falcon.sendMessage(m.chat, { text: '⏳ Mengupload file ke CloudKuImages...' }, { quoted: m });
+
         const result = await uploadFile(fileBuffer, fileName);
 
-        if (result.status === "success") {
-            return m.reply(`✅ *File berhasil diunggah!*\n\n📮 *L I N K :* ${result.url}\n📂 *File Name :* ${result.fileName}\n📊 *S I Z E :* ${result.Size} Byte\n📛 *T Y P E :* ${result.type}`);
+        if (result?.status === 'success') {
+            const { filename, type, size, url } = result.result;
+            const infoURL = result.information || 'https://cloudkuimages.com/ch';
+
+            let caption = `✅ *Upload Berhasil!*\n\n` +
+                          `📮 *URL:* ${url}\n` +
+                          `📂 *Nama:* ${filename}\n` +
+                          `📛 *Tipe:* ${type}\n` +
+                          `📊 *Ukuran:* ${size}\n` +
+                          `ℹ️ *Info:* ${infoURL}`;
+
+            await falcon.sendMessage(m.chat, { text: caption }, { quoted: m });
         } else {
-            return m.reply(`🚨 Gagal mengupload file! Server response: ${JSON.stringify(result)}`);
+            await falcon.sendMessage(m.chat, {
+                text: `🚨 Upload gagal.\n\nServer Response:\n${JSON.stringify(result, null, 2)}`
+            }, { quoted: m });
         }
-    } catch (e) {
-        console.error(e);
-        return m.reply("🚨 Terjadi kesalahan saat mengupload file!");
+
+        await falcon.sendMessage(m.chat, { delete: loading.key });
+
+    } catch (err) {
+        console.error(err);
+        falcon.sendMessage(m.chat, { text: '🚨 Terjadi kesalahan internal saat proses upload.' }, { quoted: m });
     }
 }
-break   
-
+break;
 case "tourl2": case 'nurl2': {
     if (!m.quoted) return reply("❌ *Reply file atau gambar yang mau di-upload!*");
 
@@ -1965,7 +2007,7 @@ break;
     
 case 'add': {
 if (!isGroup || !isBotAdmins || !isOwner) return
-if (isBan) return
+
 let users = m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
 await falcon.groupParticipantsUpdate(m.chat, [users], 'add').then((res) => reply(util.format(res))).catch((err) => reply(util.format(err)))
 }
@@ -1973,7 +2015,7 @@ break
 
 case 'kick': {
 if (!isGroup || !isBotAdmins || !isOwner) return
-if (isBan) return
+
 let users = m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
 await falcon.groupParticipantsUpdate(m.chat, [users], 'remove')
 reply(`Sukses kick @${users.split('@')[0]}`)
@@ -1982,7 +2024,7 @@ break
 case 'h':
 case 'hidetag': {
 if (!isGroup || !isOwner) return
-if (isBan) return
+
  if (m.quoted) {
 falcon.sendMessage(m.chat, {
 forward: m.quoted.fakeObj,
@@ -2004,10 +2046,58 @@ groupJid: m.chat
 }
 }
 break
+case 'group':
+			case 'grup': {
+				if (!m.isGroup) return m.reply(mess.group);
+				if (!isAdmins && !isGroupOwner && !isCreator) return m.reply(mess.admin);
+				if (!isBotAdmins) return m.reply(mess.botAdmin);
+				if (args[0] === 'close') {
+					await falcon.groupSettingUpdate(m.chat, 'announcement')
+						.then(() => m.reply('✅ Grup berhasil ditutup, hanya admin yang bisa mengirim pesan sekarang! 🔒'))
+						.catch((err) => m.reply(`⚠️ Gagal menutup grup: ${err}`));
+				} else if (args[0] === 'open') {
+					await falcon.groupSettingUpdate(m.chat, 'not_announcement')
+						.then(() => m.reply('✅ Grup berhasil dibuka, semua anggota bisa mengirim pesan sekarang! 🔓'))
+						.catch((err) => m.reply(`⚠️ Gagal membuka grup: ${err}`));
+				} else {
+					m.reply(`⚙️ Penggunaan perintah:\n · *${prefix + command} open* → Buka grup\n · *${prefix + command} close* → Tutup grup`);
+				}
+			}
+			break;
+case 'tutup':
+case 'close': {
+    if (!isGroup || !isBotAdmins || !isAdmins) return reply("Fitur ini hanya untuk admin grup!");
+    let duration = parseDuration(text);
+    if (!duration) return reply("Gunakan format waktu yang benar! Contoh:\n- *!tutup 5m* (5 menit)\n- *!tutup 2h* (2 jam)");
 
+    await falcon.groupSettingUpdate(m.chat, 'announcement'); // Tutup grup
+    reply(`✅ Grup ditutup! Akan dibuka dalam ${text}.`);
+
+    setTimeout(async () => {
+        await falcon.groupSettingUpdate(m.chat, 'not_announcement'); // Buka grup kembali
+        reply("🔓 Grup telah dibuka kembali.");
+    }, duration);
+}
+break;
+
+case 'buka':
+case 'open': {
+    if (!isGroup || !isBotAdmins || !isAdmins) return reply("Fitur ini hanya untuk admin grup!");
+    let duration = parseDuration(text);
+    if (!duration) return reply("Gunakan format waktu yang benar! Contoh:\n- *!buka 5m* (5 menit)\n- *!buka 2h* (2 jam)");
+
+    await falcon.groupSettingUpdate(m.chat, 'not_announcement'); // Buka grup
+    reply(`🔓 Grup dibuka! Akan ditutup dalam ${text}.`);
+
+    setTimeout(async () => {
+        await falcon.groupSettingUpdate(m.chat, 'announcement'); // Tutup grup kembali
+        reply("🔒 Grup telah ditutup kembali.");
+    }, duration);
+}
+break;
 case 'totag': {
 if (!isGroup || !isOwner) return
-if (isBan) return
+
 if (!m.quoted) return
 delete m.quoted.chat
 falcon.sendMessage(m.chat, {
@@ -2074,21 +2164,41 @@ case 'matikanpuasa': {
 break;    
 case 'setjadwal': {
     if (!isAdmins) return reply("❌ *Hanya admin yang bisa mengubah pengaturan ini!*");
-    if (!args[0]) return reply("📌 *Masukkan nama kota!*\n\nContoh: `.setjadwal Bogor`");
+    if (!args[0]) return reply("📌 *Masukkan nama kota!*\n\nContoh: `.setjadwal Bogor` atau `.setjadwal off`");
 
+    let config = loadConfig();
+    if (!config[m.chat]) ensureGroupConfig(m.chat);
+
+    // Matikan jadwal sholat
+    if (['off', 'mati'].includes(args[0].toLowerCase())) {
+        if (!config[m.chat].jadwalSholat || !config[m.chat].jadwalSholat.aktif)
+            return reply("⚠️ *Jadwal sholat sudah nonaktif!*");
+
+        config[m.chat].jadwalSholat.aktif = false;
+        saveConfig(config);
+        return reply("✅ *Jadwal sholat grup dimatikan!*");
+    }
+
+    // Proses pengaktifan jadwal sholat
     let daftarKota = await getListKota();
     if (!daftarKota) return reply("❌ *Gagal mengambil daftar kota!*");
 
     let kota = daftarKota.find(k => k.lokasi.toLowerCase().includes(args.join(" ").toLowerCase()));
     if (!kota) return reply("❌ *Kota tidak ditemukan!* Cek daftar kota dengan `.listkota`");
 
-    let config = loadConfig();
-    if (!config[m.chat]) ensureGroupConfig(m.chat);
+    let hasilJadwal = await getJadwalSholat(kota.id);
+    if (!hasilJadwal) return reply("❌ *Gagal mengambil jadwal sholat kota tersebut!*");
 
-    config[m.chat].jadwalSholat = { lokasi: kota.lokasi, cityId: kota.id, aktif: true };
+    config[m.chat].jadwalSholat = {
+        lokasi: hasilJadwal.lokasi,
+        daerah: hasilJadwal.daerah,
+        cityId: kota.id,
+        aktif: true,
+        jadwal: hasilJadwal.jadwal
+    };
     saveConfig(config);
 
-    reply(`✅ *Jadwal sholat grup diatur ke:* ${kota.lokasi}`);
+    reply(`✅ *Jadwal sholat grup diatur ke:* ${kota.lokasi}\nJadwal hari ini berhasil disimpan!`);
 }
 break;
 
@@ -2158,10 +2268,131 @@ case 'cekjadwal': {
 }
 break;    
 // === Download Menu === //
+case 'yta': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>`);
+
+    let url = args[0];
+
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await savetube.download(url, "mp3");
+        if (!result.status) return m.reply('❌ Gagal mendapatkan audio.');
+
+        let metadata = result.result;
+        let captionInfo = `🎵 *${metadata.title}*\n⏱️ *Durasi:* ${metadata.duration}\n🔗 *Bitrate:* ${metadata.quality}kbps`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
+
+        let fileSize = await getFileSizeFromUrl(metadata.download);
+        let isLarge = fileSize > 25 * 1024 * 1024; // 25MB
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : 'audio']: { url: metadata.download },
+            mimetype: 'audio/mp4',
+            fileName: `${metadata.title}.mp3`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
+case 'ytv': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>,<resolusi>\n\nContoh:\n${prefix + command} https://youtu.be/abc123,720`);
+
+    let [url, res] = text.split(',');
+    res = res ? res.trim() : '360';
+
+    const validRes = ['144', '240', '360', '480', '720', '1080', '1440', '2k', '3k', '4k', '5k', '8k'];
+    if (!validRes.includes(res)) return m.reply(`❌ Resolusi tidak valid!\nGunakan: ${validRes.join(', ')}.`);
+
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await savetube.download(url, res);
+        if (!result.status) return m.reply('❌ Gagal mendapatkan video.');
+
+        let metadata = result.result;
+        let captionInfo = `📹 *${metadata.title}*\n⏱️ *Durasi:* ${metadata.duration}\n📡 *Resolusi:* ${metadata.quality}p`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
+
+        let fileSize = await getFileSizeFromUrl(metadata.download);
+        let isLarge = fileSize > 25 * 1024 * 1024; // 25MB
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : 'video']: { url: metadata.download },
+            mimetype: 'video/mp4',
+            fileName: `${metadata.title}.mp4`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
+case 'yt': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>,<format>\n\nContoh:\n${prefix + command} https://youtu.be/abc123,mp3\n${prefix + command} https://youtu.be/abc123,720`);
+
+    let [url, format] = text.split(',');
+    format = format ? format.trim() : '360';
+
+    const validFormat = ['144', '240', '360', '480', '720', '1080', '1440', '2k', '3k', '4k', '5k', '8k', 'mp3', 'm4a', 'webm', 'aac', 'flac', 'opus', 'ogg', 'wav'];
+    if (!validFormat.includes(format)) return m.reply(`❌ Format tidak valid!\nGunakan: ${validFormat.join(', ')}.`);
+
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await savetube.download(url, format);
+        if (!result.status) return m.reply('❌ Gagal mendapatkan media.');
+
+        let metadata = result.result;
+        let captionInfo = `🎬 *${metadata.title}*\n⏱️ *Durasi:* ${metadata.duration}\n📡 *Format:* ${metadata.quality}`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📤', key: m.key } });
+
+        let fileSize = await getFileSizeFromUrl(metadata.download);
+        let isLarge = fileSize > 25 * 1024 * 1024; // 25MB
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : (format === 'mp3' ? 'audio' : 'video')]: { url: metadata.download },
+            mimetype: format === 'mp3' ? 'audio/mp4' : 'video/mp4',
+            fileName: `${metadata.title}.${format}`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
 case 'xytmp3':   
 case 'ytaudio':   
-case 'ytmp3':   
-case 'yta': {  
+case 'ytmp3':{  
     if (!text) return m.reply(`Gunakan: ${prefix + command} <url>`);  
 
     let url = args[0];
@@ -2246,10 +2477,54 @@ case 'ytv': {
     }  
 }   
 break;
+case 'douyin': {
+    if (!text) return m.reply("🚨 Masukkan URL video Douyin!\n\nContoh: .douyin https://v.douyin.com/iP47QoU3/");
+falcon.sendMessage(m.chat, { react: { text: '⏱️', key: m.key } });
+    try {
+        const axios = require('axios');
+
+        async function calculateHash(url, salt) {
+            return Buffer.from(url).toString('base64') + (url.length + 1000) + Buffer.from(salt).toString('base64');
+        }
+
+        async function SnapDouyin(url) {
+            let { data } = await axios.get('https://snapdouyin.app/id');
+            let token = data.split('<input id="token" type="hidden" name="token" value="')[1].split('"')[0];
+
+            const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+            const body = new URLSearchParams();
+            body.append('url', url);
+            body.append('token', token);
+            body.append('hash', await calculateHash(url, 'aio-dl'));
+
+            let result = await axios.post('https://snapdouyin.app/wp-json/mx-downloader/video-data/', body.toString(), { headers });
+            return result.data;
+        }
+
+        let result = await SnapDouyin(text);
+        if (!result.medias || result.medias.length === 0) return m.reply("❌ Gagal mengambil media!");
+
+        let media = result.medias.find(m => m.quality.includes("hd")) || result.medias[0];
+        let caption = `🎬 *Douyin Video Downloaded!*\n\n📌 *Judul:* ${result.title}\n⏱️ *Durasi:* ${result.duration}\n🔗 *Sumber:* ${result.url}`;
+
+        await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+
+        await falcon.sendMessage(m.chat, { 
+            video: { url: media.url }, 
+            caption: caption
+        }, { quoted: m });
+
+        falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan saat mengunduh video!");
+    }
+}
+break;
 case 'tiktok':
 case 'ttdl':
 case 'tt': {
-if (isBan) return
+
 if (!text) return reply(penggunaan("https://vt.tiktok.com/ZSYgBPSLD/"))
 if (!(text.includes('http://') || text.includes('https://'))) return reply(`Link Invalid`)
 if (!text.includes('tiktok.com')) return reply(`Link Invalid`)
@@ -2272,7 +2547,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: `© ${global.namaowner} - 2025`,
+footer: `© ${global.nameonwer} - 2025`,,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${text}`,
@@ -2299,17 +2574,28 @@ break
 
 case 'tiktokmp4':
 case 'tiktokvideo': {
-if (isBan) return
+
 if (!text) return reply(penggunaan("https://vt.tiktok.com/ZSYgBPSLD/"))
 if (!(text.includes('http://') || text.includes('https://'))) return reply(`Link Invalid`)
 if (!text.includes('tiktok.com')) return reply(`Link Invalid`)
 reaction("⏳")
 const data = await fetchJson(`https://api.tiklydown.eu.org/api/download?url=${encodeURIComponent(text)}`)
 const vidnya = data.video.noWatermark
-const caption = `${data.title}`
+const caption = `Download berhasil ✅
+🆔 Id: ${data.id}
+🎥 title: ${data.title}
+🗓️ date: ${data.created_at}
+♥️ Like: ${data.stats.likeCount}
+💬 Comment: ${data.stats.commentCount}
+🚀 Share: ${data.stats.shareCount}
+▶️ Play: ${data.stats.playCount}
+🔰 Save: ${data.stats.saveCount}
+
+© ${global.nameonwer} - 2025
+`
 reaction("✅")
 falcon.sendMessage(m.chat, {
-caption: `Download By ${global.namaowner}`,
+caption: caption,
 video: {
 url: vidnya
 }
@@ -2321,7 +2607,7 @@ break
 
 case 'tiktokmp3':
 case 'tiktokaudio': {
-if (isBan) return
+
 if (!text) return reply(penggunaan("https://vt.tiktok.com/ZSYgBPSLD/"))
 if (!(text.includes('http://') || text.includes('https://'))) return reply(`Link Invalid`)
 if (!text.includes('tiktok.com')) return reply(`Link Invalid`)
@@ -2374,11 +2660,183 @@ await falcon.sendMessage(m.chat, { document: imagepdf, fileName: data.data.title
   }
 } 
 break
+case 'ig': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>,<format>\n\nContoh penggunaan:\n* For Video:\n${prefix + command} https://www.instagram.com/reel/abc123,720\n* For Audio:\n${prefix + command} https://www.instagram.com/reel/abc123,mp3`);
+
+    let [url, format] = text.split(',');
+    format = format ? format.trim() : '720'; 
+
+    const validFormat = ['360', '480', '720', '1080', '4k', 'mp3'];
+    if (!validFormat.includes(format)) return m.reply(`❌ Format tidak valid!\nGunakan: ${validFormat.join(', ')}.`);
+    const instaDownloader = require("./igdl");
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await instaDownloader.download(url, format);
+        if (!result.status) return m.reply('❌ Gagal mendapatkan media.');
+
+        let metadata = result.result;
+        let captionInfo = `📷 *Instagram Downloader*\n📌 *Judul:* ${metadata.title}\n⏱️ *Durasi:* ${metadata.duration}\n📡 *Format:* ${metadata.quality}`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+
+        let fileUrl = format === 'mp3' ? metadata.download.audio : metadata.download.video;
+        let fileSize = await getFileSizeFromUrl(fileUrl);
+        let isLarge = fileSize > 25 * 1024 * 1024;
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : (format === 'mp3' ? 'audio' : 'video')]: { url: fileUrl },
+            mimetype: format === 'mp3' ? 'audio/mp4' : 'video/mp4',
+            fileName: `${metadata.title}.${format}`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
+case 'igmp4': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>\n\nContoh:\n${prefix + command} https://www.instagram.com/reel/abc123`);
+
+    let url = text.trim();
+    let format = '720';
+   const instaDownloader = require("./igdl");
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await instaDownloader.download(url, format);
+        if (!result.status) return m.reply('❌ Gagal mendapatkan video.');
+
+        let metadata = result.result;
+        let captionInfo = `📷 *Instagram Video*\n📌 *Judul:* ${metadata.title}\n⏱️ *Durasi:* ${metadata.duration}\n📡 *Resolusi:* ${metadata.quality}p`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+
+        let fileUrl = metadata.download.video;
+        let fileSize = await getFileSizeFromUrl(fileUrl);
+        let isLarge = fileSize > 25 * 1024 * 1024;
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : 'video']: { url: fileUrl },
+            mimetype: 'video/mp4',
+            fileName: `${metadata.title}.mp4`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
+case 'igmp3': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>\n\nContoh:\n${prefix + command} https://www.instagram.com/reel/abc123`);
+
+    let url = text.trim();
+    let format = 'mp3'; 
+  const instaDownloader = require("./igdl");
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await instaDownloader.download(url, format);
+        if (!result.status) return m.reply('❌ Gagal mendapatkan audio.');
+
+        let metadata = result.result;
+        let captionInfo = `🎵 *Instagram Audio*\n📌 *Judul:* ${metadata.title}\n⏱️ *Durasi:* ${metadata.duration}\n🔊 *Bitrate:* ${metadata.quality}kbps`;
+
+        await falcon.sendMessage(m.chat, {
+            image: { url: metadata.thumbnail || '' },
+            caption: captionInfo
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+
+        let fileUrl = metadata.download.audio;
+        let fileSize = await getFileSizeFromUrl(fileUrl);
+        let isLarge = fileSize > 25 * 1024 * 1024;
+
+        await falcon.sendMessage(m.chat, { 
+            [isLarge ? 'document' : 'audio']: { url: fileUrl },
+            mimetype: 'audio/mp4',
+            fileName: `${metadata.title}.mp3`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply('❌ Terjadi kesalahan.');
+    }
+}
+break;
+
+case 'terabox': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <url>\n\nContoh: ${prefix + command} https://terabox.com/s/1B1nTfxPq9_Ib-rf_M_6oFg`);
+
+    const axios = require("axios");
+
+    async function teraboxdl(url) {
+        try {
+            const apiUrl = `https://teraboxdownloaderonline.com/api/download-m3u8?terabox_link=${encodeURIComponent(url)}`;
+            const headers = {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36",
+                "Referer": `https://teraboxdownloaderonline.com/player?url=${encodeURIComponent(url)}`,
+            };
+
+            const response = await axios.get(apiUrl, { headers });
+
+            const match = response.data.match(/#EXTINF:\d+,\s*(https[^\s]+)/);
+            if (match && match[1]) {
+                return { status: "success", video_url: match[1] };
+            } else {
+                return { status: "error", message: "❌ Video URL tidak ditemukan." };
+            }
+        } catch (error) {
+            return { status: "error", message: "❌ Terjadi kesalahan saat mengambil data.", error: error.message };
+        }
+    }
+
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let result = await teraboxdl(text);
+        if (result.status !== "success") return m.reply(result.message);
+
+        await falcon.sendMessage(m.chat, { react: { text: '📥', key: m.key } });
+
+        await falcon.sendMessage(m.chat, {
+            video: { url: result.video_url },
+            mimetype: 'video/mp4',
+            caption: `✅ *Berhasil mengunduh dari Terabox!*`
+        }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan.");
+    }
+}
+break;
 
 case 'remini':
 case 'hd':
 case 'hdr': {
-if (isBan) return
+
 if (!quoted || !/image/.test(mime)) return reply(`BalasGambar Dengan Caption *${prefix + command}*`)
 reaction("⏳")
 let media = await quoted.download()
@@ -2391,7 +2849,6 @@ quoted: m
 })
 }
 break
-
 case 'pin':
 case 'pinterest': {
     if (!text) return reply(`Format salah, contoh: \n${prefix + command} Anime`)
@@ -2427,7 +2884,7 @@ case 'pinterest': {
                 }]
             }), 
             footer: proto.Message.InteractiveMessage.Footer.create({
-                text: "FalconProject"
+                text: `© ${global.nameonwer}`
             })
         })
     }
@@ -2455,6 +2912,7 @@ case 'pinterest': {
     falcon.relayMessage(m.chat, msg.message, { messageId: msg.key.id })
 }
 break
+
 // === Music === //
 case 'plays':
 case 'play': 
@@ -2491,112 +2949,6 @@ quoted: m
 console.error(err);
 m.reply(`*Terjadi kesalahan!* 😭\n${err.message || err}`);
 }
-}
-break;
-case 'spotify': {
-if (isBan) return
-if (!text) return reply(penggunaan("surat cinta untuk starla"))
-try {
-reaction("⏳")
-let search = await fetch(`https://spotifyapi.caliphdev.com/api/search/tracks?q=${text}`)
-let tracks = await search.json()
-let track = tracks[0]
-let download = await fetch(`https://api.siputzx.my.id/api/d/spotify?url=${track.url}`)
-let result = await download.json()
-reaction("✅")
-falcon.sendMessage(m.chat, {
-audio: {
-url: result.download
-},
-mimetype: 'audio/mpeg',
-contextInfo: {
-externalAdReply: {
-thumbnailUrl: result.metadata.cover_url,
-title: result.metadata.name,
-body: result.metadata.artist,
-renderLargerThumbnail: true,
-mediaType: 1,
-},
-},
-}, {
-quoted: m
-})
-} catch (error) {
-reaction("❌")
-}
-}
-break
-case "yts": {
-    if (!text) return m.reply(penggunaan('we dont talk'))
-    await falcon.sendMessage(m.chat, { react: { text: '🔎', key: m.key } });
-
-    let ytsSearch = await yts(text);
-    const results = ytsSearch.all.slice(0, 7); // Ambil maksimal 7 hasil
-
-    if (results.length === 0) return m.reply("❌ Tidak ditemukan hasil pencarian.");
-
-    let slides = [];
-    for (let video of results) {
-        let { title, url, timestamp, ago, views, author, image } = video;
-        
-        // Buat thumbnail dan info video
-        let media = await prepareWAMessageMedia({ image: { url: image } }, { upload: falcon.waUploadToServer });
-        
-        slides.push({
-            header: proto.Message.InteractiveMessage.Header.fromObject({
-                title: `🎬 ${title}`,
-                hasMediaAttachment: true,
-                ...media
-            }),
-            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
-                buttons: [
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: `{
-                            "display_text": "🔗 Link Video",
-                            "copy_code": "${url}"
-                        }`
-                    },
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: `{
-                            "display_text": "🎵 Audio",
-                            "copy_code": ".yta ${url}"
-                        }`
-                    },
-                    {
-                        name: "cta_copy",
-                        buttonParamsJson: `{
-                            "display_text": "🎥 Video",
-                            "copy_code": ".ytv ${url}"
-                        }`
-                    }
-                ]
-            }),
-            footer: proto.Message.InteractiveMessage.Footer.create({
-                text: `📅 Rilis: ${ago} | 👀 Views: ${views} | 🎤 ${author.name || "Unknown"}`
-            })
-        });
-    }
-
-    // Kirim sebagai carousel slide
-    const msg = await generateWAMessageFromContent(m.chat, {
-        viewOnceMessage: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
-                    body: proto.Message.InteractiveMessage.Body.fromObject({
-                        text: `🔎 Hasil pencarian YouTube untuk *"${text}"*`
-                    }),
-                    carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
-                        cards: slides
-                    })
-                })
-            }
-        }
-    }, { userJid: sender, quoted: m });
-
-    falcon.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
 }
 break;
 case 'spotifydl': {
@@ -2721,10 +3073,69 @@ case 'spotifysearch': {
  }
 }
 break
+case "yts": {
+    if (!text) return m.reply(penggunaan('we dont talk'))
+    await falcon.sendMessage(m.chat, { react: { text: '🔎', key: m.key } });
+
+    let ytsSearch = await yts(text);
+    const results = ytsSearch.all.slice(0, 7); // Ambil maksimal 7 hasil
+
+    if (results.length === 0) return m.reply("❌ Tidak ditemukan hasil pencarian.");
+
+    let slides = [];
+    for (let video of results) {
+        let { title, url, timestamp, ago, views, author, image } = video;
+        
+        // Buat thumbnail dan info video
+        let media = await prepareWAMessageMedia({ image: { url: image } }, { upload: falcon.waUploadToServer });
+        
+        slides.push({
+            header: proto.Message.InteractiveMessage.Header.fromObject({
+                title: `🎬 ${title}`,
+                hasMediaAttachment: true,
+                ...media
+            }),
+            nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.fromObject({
+                buttons: [
+                    {
+                        name: "cta_copy",
+                        buttonParamsJson: `{
+                            "display_text": "🔗 Link Video",
+                            "copy_code": "${url}"
+                        }`
+                    }
+                ]
+            }),
+            footer: proto.Message.InteractiveMessage.Footer.create({
+                text: `📅 Rilis: ${ago} | 👀 Views: ${views} | 🎤 ${author.name || "Unknown"}`
+            })
+        });
+    }
+
+    // Kirim sebagai carousel slide
+    const msg = await generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
+                interactiveMessage: proto.Message.InteractiveMessage.fromObject({
+                    body: proto.Message.InteractiveMessage.Body.fromObject({
+                        text: `🔎 Hasil pencarian YouTube untuk *"${text}"*`
+                    }),
+                    carouselMessage: proto.Message.InteractiveMessage.CarouselMessage.fromObject({
+                        cards: slides
+                    })
+                })
+            }
+        }
+    }, { userJid: sender, quoted: m });
+
+    falcon.relayMessage(m.chat, msg.message, { messageId: msg.key.id });
+}
+break;
 // === Fun === //
 case 'afk': {
 if (!isGroup) return reply("Fitur khusus Grup")
-if (isBan) return
+
 if (!text) return reply(penggunaan("sholat"))
 if (isAfkOn) return reply("Anda Sudah Afk Sebelumnya")
 let reason = text
@@ -2878,45 +3289,20 @@ case "ping": {
 }
 break;  
 case "cekidch": case "idch": {
-    if (!text) return m.reply(penggunaan("linkchnya"))
-    if (!text.includes("https://whatsapp.com/channel/")) return m.reply("Link tautan tidak valid")
-
-    let result = text.split('https://whatsapp.com/channel/')[1]
-    let res = await falcon.newsletterMetadata("invite", result)
-
-    let teks = `
+if (!text) return m.reply(penggunaan ("linkchnya"))
+if (!text.includes("https://whatsapp.com/channel/")) return m.reply("Link tautan tidak valid")
+let result = text.split('https://whatsapp.com/channel/')[1]
+let res = await falcon.newsletterMetadata("invite", result)
+let teks = `
 * *ID :* ${res.id}
 * *Nama :* ${res.name}
 * *Total Pengikut :* ${res.subscribers}
 * *Status :* ${res.state}
 * *Verified :* ${res.verification == "VERIFIED" ? "Terverifikasi" : "Tidak"}
 `
-
-    let msgii = generateWAMessageFromContent(m.chat, {
-        viewOnceMessage: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: proto.Message.InteractiveMessage.create({
-                    body: proto.Message.InteractiveMessage.Body.create({ 
-                        text: teks
-                    }), 
-                    footer: proto.Message.InteractiveMessage.Footer.create({ 
-                        text: `© ${global.namaowner} - 2025`
-                    }), 
-                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                        buttons: [{
-                            "name": "cta_copy",
-                            "buttonParamsJson": `{\"display_text\":\"Copy ID Channel\",\"id\":\"123456789\",\"copy_code\":\"${res.id}\"}`
-                        }]
-                    })
-                })
-            }
-        }
-    }, { userJid: m.sender, quoted: m })
-
-    await falcon.relayMessage(m.chat, msgii.message, { messageId: msgii.key.id })
+return m.reply(teks)
 }
-break
+break    
 case "cekidgc": {
     if (!text) return m.reply("Masukin link grupnya!")
     let regex = /chat\.whatsapp\.com\/([\w\d]*)/i
@@ -2925,41 +3311,57 @@ case "cekidgc": {
 
     let code = match[1]
     let info = await falcon.groupGetInviteInfo(code)
-
-    let teks = ` 乂 *Info Group*\n\n`
-    teks += `* *Nama:* ${info.subject}\n`
-    teks += `* *ID:* ${info.id}\n`
-    teks += `* *Status:* ${info.announce == false ? "Terbuka" : "Hanya Admin"}\n`
+    
+    let teks = ` 乂 Info Group\n\n`
+    teks +=`* *Nama:* ${info.subject}\n`
+    teks +=`* *ID:* ${info.id}\n`
+    teks +=`* *Status:* ${info.announce == false ? "Terbuka" : "Hanya Admin"}\n`
     teks += `* *Pembuat:* ${info?.subjectOwner ? info.subjectOwner.split("@")[0] : "Sudah Keluar"}\n`
-
-    let msgii = generateWAMessageFromContent(m.chat, {
-        viewOnceMessage: {
-            message: {
-                messageContextInfo: { deviceListMetadata: {}, deviceListMetadataVersion: 2 },
-                interactiveMessage: proto.Message.InteractiveMessage.create({
-                    body: proto.Message.InteractiveMessage.Body.create({ 
-                        text: teks
-                    }), 
-                    footer: proto.Message.InteractiveMessage.Footer.create({ 
-                        text: `© ${global.namaowner} - 2025`
-                    }), 
-                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                        buttons: [
-                            {
-                                "name": "cta_copy",
-                                "buttonParamsJson": `{\"display_text\":\"Copy ID Grup\",\"id\":\"123456789\",\"copy_code\":\"${info.id}\"}`
-                            }
-                        ]
-                    })
-                })
-            }
-        }
-    }, { userJid: m.sender, quoted: m })
-
-    await falcon.relayMessage(m.chat, msgii.message, { messageId: msgii.key.id })
+    
+    return m.reply(teks)
 }
-break
-case "whatanime": {
+break  
+          // AI //
+case "autoai": {
+    if (!text) return reply(`*Contoh:* .autoai *[on/off/reset]*`);
+
+    if (text === "on") {
+        if (!sessions[sender]) sessions[sender] = {};
+        sessions[sender].active = true;
+        saveSession();
+        return m.reply(`[ ✅ ] *Auto AI diaktifkan!* Sekarang bot akan merespon chat secara otomatis.`);
+    } 
+    
+    if (text === "off") {
+        if (sessions[sender]) sessions[sender].active = false;
+        saveSession();
+        return m.reply(`[ ❌ ] *Auto AI dimatikan!* Sekarang bot hanya merespon jika dipanggil.`);
+    } 
+    
+    if (text === "reset") {
+        if (!sessions[sender]) return m.reply("⚠️ *Tidak ada sesi yang perlu direset!*");
+        sessions[sender].messages = [];
+        saveSession();
+        return m.reply("♻️ *Riwayat chat AI telah direset!*");
+    }
+}
+break;
+    case "setmodel": {
+    let index = parseInt(text) - 1;
+
+    if (isNaN(index) || index < 0 || index >= availableModels.length) {
+        let modelList = availableModels.map((m, i) => `🔹 ${i + 1}. ${m}`).join("\n");
+        return m.reply(`📜 *Daftar Model AI:*\n\n${modelList}\n\n🔧 *Gunakan:* .setmodel <nomor>\n📌 *Contoh:* .setmodel 2`);
+    }
+
+    sessions[m.sender] = { model: availableModels[index] };
+    saveSession();
+
+    return m.reply(`✅ *Model AI diubah ke:* ${availableModels[index]}`);
+}
+break;
+
+   case "whatanime": {
     let mediaMessage = m.quoted ? m.quoted : m;
     if (!/image|video/.test(mediaMessage.mtype)) 
         return m.reply("Kirim atau reply gambar/video anime yang mau dicari!");
@@ -2993,112 +3395,8 @@ case "whatanime": {
         m.reply("⚠️ Error saat mencari anime!");
     }
 }
-break;   
-          // AI //
-case "autoai": {
-        if (!text) return reply(`*Contoh:* .autoai *[on/off/reset]*`);
-
-        if (text === "on") {
-            sessions[sender] = { messages: [] };
-            saveSession();
-            return m.reply(`[ ✅ ] *Auto AI diaktifkan!* Sekarang bot akan merespon chat secara otomatis.`);
-        } else if (text === "off") {
-            delete sessions[sender];
-            saveSession();
-            return m.reply(`[ ❌ ] *Auto AI dimatikan!* Sekarang bot hanya merespon jika dipanggil.`);
-        } else if (text === "reset") {
-            if (!sessions[sender]) return m.reply("⚠️ *Tidak ada sesi yang perlu direset!*");
-            delete sessions[sender];
-            saveSession();
-            return m.reply("♻️ *Riwayat chat AI telah direset!*");
-        }
-    }
-    break;
-    // CAI
-case "caisearch": {
-    if (!text) return m.reply("⚡ *Contoh:* .caisearch Nahida");
-
-    try {
-        let { data } = await axios.get(`https://cai.neekoi.me/search?q=${encodeURIComponent(text)}`);
-        if (!data.characters || data.characters.length === 0) return m.reply("⚠️ Karakter tidak ditemukan!");
-
-        let char = data.characters[0]; // Ambil karakter pertama yang paling relevan
-        let charID = char.external_id;
-        let profile = `🔍 *Profil Karakter CAI:*
-🟢 *Nama:* ${char.participant__name}
-📜 *Judul:* ${char.title}
-🎭 *Creator:* ${char.user__username}
-💬 *Greeting:* ${char.greeting}
-🔗 *ID:* ${charID}`;
-
-        falcon.sendMessage(m.chat, {
-            text: profile,
-            footer: "© FlowFalcon - 2025",
-            buttons: [
-                {
-                    buttonId: `${prefix}setcai ${charID}`,
-                    buttonText: { displayText: "Set Character AI" }
-                }
-            ],
-            viewOnce: true,
-            headerType: 1
-        }, { quoted: m });
-
-    } catch (err) {
-        console.error(err);
-        return m.reply("⚠️ Terjadi kesalahan saat mencari karakter!");
-    }
-}
 break;
-
-case "setcai": {
-    if (!text) return m.reply("⚡ *Contoh:* .setcai PfwqGXduLsrsncRQt1G4nRyBcqLSxcLsnjR44rxJgRY");
-
-    cai_users[sender] = { char_id: text, active: false };
-    saveCaiDB();
-
-    return m.reply(`✅ *Karakter berhasil disimpan!*\nGunakan \`.cai start\` untuk mulai ngobrol.`);
-}
-break;
-
-case "cai": {
-    if (!text) return m.reply("⚡ *Contoh:* .cai start / .cai reset / .cai off");
-
-    if (text === "start") {
-        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*\nGunakan `.setcai <id>` terlebih dahulu.");
-
-        cai_users[sender].active = true;
-        saveCaiDB();
-
-        return m.reply(`✅ *AutoChat CAI diaktifkan!*\nSekarang bot akan ngobrol otomatis dengan karakter.`);
-    }
-
-    if (text === "reset") {
-        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
-
-        try {
-            let { data } = await axios.get(`https://cai.neekoi.me/newchat?id=${cai_users[sender].char_id}`);
-            if (!data.external_id) return m.reply("⚠️ Gagal mereset sesi!");
-
-            cai_users[sender].chat_id = data.external_id;
-            saveCaiDB();
-
-            return m.reply(`♻️ *Sesi chat berhasil direset!*`);
-        } catch (err) {
-            console.error(err);
-            return m.reply("⚠️ Terjadi kesalahan saat mereset sesi!");
-        }
-    }
-
-    if (text === "off") {
-        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
-
-        cai_users[sender].active = false;
-        saveCaiDB();
-
-        return m.reply(`❌ *AutoChat CAI dimatikan!*`);
-    }
-}
+    
           //cpanel menu server 1 //
 case "cadmin": {
 if (!isOwner
@@ -3506,416 +3804,7 @@ if (sections == undefined) return m.reply("Server panel tidak ditemukan!")
 m.reply(`Berhasil menghapus server panel *${capital(nameSrv)}*`)
 }
 break
-
-//cpanel menu server 2
-case "cadmin-v2": {
-  if (!isOwner
-  ) return Reply(mess.owner)
-  if (!text) return m.reply(example("username"))
-  let username = text.toLowerCase()
-  let email = username+"@gmail.com"
-  let name = capital(args[0])
-  let password = username+crypto.randomBytes(2).toString('hex')
-  let f = await fetch(domain2 + "/api/application/users", {
-  "method": "POST",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  },
-  "body": JSON.stringify({
-  "email": email,
-  "username": username.toLowerCase(),
-  "first_name": name,
-  "last_name": "Admin",
-  "root_admin": true,
-  "language": "en",
-  "password": password.toString()
-  })
-  })
-  let data = await f.json();
-  if (data.errors) return m.reply(JSON.stringify(data.errors[0], null, 2))
-  let user = data.attributes
-  var orang
-  if (m.isGroup) {
-  orang = m.sender
-  await m.reply("*Berhasil membuat admin panel ✅*\nData akun sudah di kirim ke private chat")
-  } else {
-  orang = m.chat
-  }
-  var teks = `
-  *Berhasil Membuat Admin Panel ✅*
-  
-  * *ID User :* ${user.id}
-  * *Nama :* ${user.first_name}
-  * *Username :* ${user.username}
-  * *Password :* ${password.toString()}
-  * *Login :* ${global.domain2}
-  `
-  let msgii = generateWAMessageFromContent(m.chat, { viewOnceMessage: { message: { 
-  "messageContextInfo": { 
-  "deviceListMetadata": {}, 
-  "deviceListMetadataVersion": 2
-  }, 
-  interactiveMessage: proto.Message.InteractiveMessage.create({
-  contextInfo: { 
-  mentionedJid: [m.sender], 
-  externalAdReply: {
-  showAdAttribution: true }
-  }, body: proto.Message.InteractiveMessage.Body.create({ 
-  text: teks
-  }), 
-  footer: proto.Message.InteractiveMessage.Footer.create({ 
-  text: global.foother
-  }), 
-  nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ 
-  buttons: [{
-  "name": "cta_url",
-  "buttonParamsJson": `{\"display_text\":\"Login Server Panel\",\"url\":\"${global.domain2}\",\"merchant_url\":\"https://www.google.com\"}`
-  }, 
-  {
-  "name": "cta_copy",
-  "buttonParamsJson": `{\"display_text\":\"Copy Username\",\"id\":\"123456789\",\"copy_code\":\"${user.username}\"}`
-  },
-  {
-  "name": "cta_copy",
-  "buttonParamsJson": `{\"display_text\":\"Copy Password\",\"id\":\"123456789\",\"copy_code\":\"${password.toString()}\"}`
-  }]
-  })
-  })} 
-  }}, {userJid: m.sender, quoted: null}) 
-  await falcon.relayMessage(orang, msgii.message, { 
-  messageId: msgii.key.id 
-  })
-  global.panel2 = null
-  }
-  break
-   case "buatpanel-v2": case "cpanel-v2": {
-  if (global.apikey2.length < 1) return m.reply("apikey2 Tidak Ditemukan!")
-  if (!args[0]) return m.reply(penggunaan("nama"))
-  global.panel2 = [text.toLowerCase()]
-  let teksnya = "Silahkan Pilih Ram Server Panel"
-  let msgii = generateWAMessageFromContent(m.chat, { viewOnceMessage: { message: { 
-  "messageContextInfo": { 
-  "deviceListMetadata": {}, 
-  "deviceListMetadataVersion": 2
-  }, 
-  interactiveMessage: proto.Message.InteractiveMessage.create({
-  contextInfo: { 
-  mentionedJid: [m.sender], 
-  externalAdReply: {
-  showAdAttribution: true }
-  }, body: proto.Message.InteractiveMessage.Body.create({ 
-  text: teksnya
-  }), 
-  footer: proto.Message.InteractiveMessage.Footer.create({ 
-  text: global.foother
-  }), 
-  nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ 
-  buttons: [{
-  "name": "single_select",
-  "buttonParamsJson": `{ "title": "Pilih Ram Panel", "sections": [{ "title": "# Silahkan Pilih Salah Satu Di Bawah Ini", "highlight_label": \"⭐\", "rows": [{ "header": "Ram Unlimited", "title": "Ram Unlimited | CPU Unlimited", "id": ".unli2 ${teks}" }, 
-  { "header": "Ram 1GB", "title": "Ram 1GB | CPU 40%", "id": ".1gb2 ${text}" }, 
-  { "header": "Ram 2GB", "title": "Ram 2GB | CPU 60%", "id": ".2gb2 ${text}" }, 
-  { "header": "Ram 3GB", "title": "Ram 3GB | CPU 80%", "id": ".3gb2 ${text}" }, 
-  { "header": "Ram 4GB", "title": "Ram 4GB | CPU 100%", "id": ".4gb2 ${text}" }, 
-  { "header": "Ram 5GB", "title": "Ram 5GB | CPU 120%", "id": ".5gb2 ${text}" }, 
-  { "header": "Ram 6GB", "title": "Ram 6GB | CPU 140%", "id": ".6gb2 ${text}" }, 
-  { "header": "Ram 7GB", "title": "Ram 7GB | CPU 160%", "id": ".7gb2 ${text}" }, 
-  { "header": "Ram 8GB", "title": "Ram 8GB | CPU 180%", "id": ".8gb2 ${text}" }, 
-  { "header": "Ram 9GB", "title": "Ram 9GB | CPU 200%", "id": ".9gb2 ${text}" },
-  { "header": "Ram 10GB", "title": "Ram 10GB | CPU 250%", "id": ".10gb2 ${text}" }]}]}`
-  }]
-  })
-  })} 
-  }}, {userJid: m.sender, quoted: null}) 
-  await falcon.relayMessage(msgii.key.remoteJid, msgii.message, { 
-  messageId: msgii.key.id 
-  })
-  }
-  break
-  case "1gb2": case "2gb2": case "3gb2": case "4gb2": case "5gb2": case "6gb2": case "7gb2": case "8gb2": case "9gb2": case "10gb2": case "unli2": {
-  if (!isOwner && !isPremium) return m.reply(mess.owner)
-  if (global.panel2 == null) return m.reply('Nama/Username Tidak Di Temukan')
-  var ram
-  var disknya
-  var cpu
-  if (command == "1gb2") {
-  ram = "1000"
-  disknya = "1000"
-  cpu = "40"
-  } else if (command == "2gb2") {
-  ram = "2000"
-  disknya = "1000"
-  cpu = "60"
-  } else if (command == "3gb2") {
-  ram = "3000"
-  disknya = "2000"
-  cpu = "80"
-  } else if (command == "4gb2") {
-  ram = "4000"
-  disknya = "2000"
-  cpu = "100"
-  } else if (command == "5gb2") {
-  ram = "5000"
-  disknya = "3000"
-  cpu = "120"
-  } else if (command == "6gb2") {
-  ram = "6000"
-  disknya = "3000"
-  cpu = "140"
-  } else if (command == "7gb2") {
-  ram = "7000"
-  disknya = "4000"
-  cpu = "160"
-  } else if (command == "8gb2") {
-  ram = "8000"
-  disknya = "4000"
-  cpu = "180"
-  } else if (command == "9gb2") {
-  ram = "9000"
-  disknya = "5000"
-  cpu = "200"
-  } else if (command == "10gb2") {
-  ram = "10000"
-  disknya = "5000"
-  cpu = "220"
-  } else {
-  ram = "0"
-  disknya = "0"
-  cpu = "0"
-  }
-  let username = global.panel2[0].toLowerCase()
-  let email = username+"@gmail.com"
-  let name = capital(username) + " Server"
-  let password = username+crypto.randomBytes(2).toString('hex')
-  let f = await fetch(domain2 + "/api/application/users", {
-  "method": "POST",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  },
-  "body": JSON.stringify({
-  "email": email,
-  "username": username.toLowerCase(),
-  "first_name": name,
-  "last_name": "Server",
-  "language": "en",
-  "password": password.toString()
-  })
-  })
-  let data = await f.json();
-  if (data.errors) return m.reply(JSON.stringify(data.errors[0], null, 2))
-  let user = data.attributes
-  let desc = ''
-  let usr_id = user.id
-  let f1 = await fetch(domain2 + `/api/application/nests/${nestid}/eggs/` + egg, {
-  "method": "GET",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let data2 = await f1.json();
-  let startup_cmd = data2.attributes.startup
-  let f2 = await fetch(domain2 + "/api/application/servers", {
-  "method": "POST",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2,
-  },
-  "body": JSON.stringify({
-  "name": name,
-  "description": desc,
-  "user": usr_id,
-  "egg": parseInt(egg),
-  "docker_image": "ghcr.io/parkervcp/yolks:nodejs_18",
-  "startup": startup_cmd,
-  "environment": {
-  "INST": "npm",
-  "USER_UPLOAD": "0",
-  "AUTO_UPDATE": "0",
-  "CMD_RUN": "npm start"
-  },
-  "limits": {
-  "memory": ram,
-  "swap": 0,
-  "disk": disknya,
-  "io": 500,
-  "cpu": cpu
-  },
-  "feature_limits": {
-  "databases": 5,
-  "backups": 5,
-  "allocations": 5
-  },
-  deploy: {
-  locations: [parseInt(loc)],
-  dedicated_ip: false,
-  port_range: [],
-  },
-  })
-  })
-  let result = await f2.json()
-  if (result.errors) return m.reply(JSON.stringify(result.errors[0], null, 2))
-  let server = result.attributes
-  var orang
-  if (m.isGroup) {
-  orang = m.sender
-  await m.reply("*Berhasil membuat panel ✅*\nData akun sudah dikirim ke privat chat")
-  } else {
-  orang = m.chat
-  }
-  var teks = `
-  *Berhasil Membuat Akun Panel ✅*
-  
-  * *ID Server :* ${server.id}
-  * *Nama :* ${name}
-  * *Username :* ${user.username}
-  * *Password :* ${password}
-  * *Login :* ${global.domain2}
-  * *Expired Server :* 1 Bulan
-  `
-  let msgii = generateWAMessageFromContent(m.chat, { viewOnceMessage: { message: { 
-  "messageContextInfo": { 
-  "deviceListMetadata": {}, 
-  "deviceListMetadataVersion": 2
-  }, 
-  interactiveMessage: proto.Message.InteractiveMessage.create({
-  contextInfo: { 
-  mentionedJid: [m.sender], 
-  externalAdReply: {
-  showAdAttribution: true }
-  }, body: proto.Message.InteractiveMessage.Body.create({ 
-  text: teks
-  }), 
-  footer: proto.Message.InteractiveMessage.Footer.create({ 
-  text: global.foother
-  }), 
-  nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({ 
-  buttons: [{
-  "name": "cta_url",
-  "buttonParamsJson": `{\"display_text\":\"Login Server Panel\",\"url\":\"${global.domain2}\",\"merchant_url\":\"https://www.google.com\"}`
-  }, 
-  {
-  "name": "cta_copy",
-  "buttonParamsJson": `{\"display_text\":\"Copy Username\",\"id\":\"123456789\",\"copy_code\":\"${user.username}\"}`
-  },
-  {
-  "name": "cta_copy",
-  "buttonParamsJson": `{\"display_text\":\"Copy Password\",\"id\":\"123456789\",\"copy_code\":\"${password.toString()}\"}`
-  }]
-  })
-  })} 
-  }}, {userJid: m.sender, quoted: null}) 
-  await falcon.relayMessage(orang, msgii.message, { 
-  messageId: msgii.key.id 
-  })
-  global.panel2 = null
-  }
-  break  
-        case "deladmin-v2": {
-  if (!isOwner) return m.reply(mess.owner)
-  if (!text) return m.reply(penggunaan("idnya"))
-  let cek = await fetch(domain2 + "/api/application/users?page=1", {
-  "method": "GET",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let res2 = await cek.json();
-  let users = res2.data;
-  let getid = null
-  let idadmin = null
-  await users.forEach(async (e) => {
-  if (e.attributes.id == args[0] && e.attributes.root_admin == true) {
-  getid = e.attributes.username
-  idadmin = e.attributes.id
-  let delusr = await fetch(domain2 + `/api/application/users/${idadmin}`, {
-  "method": "DELETE",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let res = delusr.ok ? {
-  errors: null
-  } : await delusr.json()
-  }
-  })
-  if (idadmin == null) return m.reply("Akun admin panel tidak ditemukan!")
-  await m.reply(`Berhasil menghapus akun admin panel *${capital(getid)}*`)
-  }
-  break
-  case "delpanel-v2": {
-  if (!isOwner && !isPremium) return m.reply(mess.owner)
-  if (!text) return m.reply(penggunaan("idnya"))
-  let f = await fetch(domain2 + "/api/application/servers?page=1", {
-  "method": "GET",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let result = await f.json()
-  let servers = result.data
-  let sections
-  let nameSrv
-  for (let server of servers) {
-  let s = server.attributes
-  if (Number(text) == s.id) {
-  sections = s.name.toLowerCase()
-  nameSrv = s.name
-  let f = await fetch(domain2 + `/api/application/servers/${s.id}`, {
-  "method": "DELETE",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2,
-  }
-  })
-  let res = f.ok ? {
-  errors: null
-  } : await f.json()
-  }}
-  let cek = await fetch(domain2 + "/api/application/users?page=1", {
-  "method": "GET",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let res2 = await cek.json();
-  let users = res2.data;
-  for (let user of users) {
-  let u = user.attributes
-  if (u.first_name.toLowerCase() == sections) {
-  let delusr = await fetch(domain2 + `/api/application/users/${u.id}`, {
-  "method": "DELETE",
-  "headers": {
-  "Accept": "application/json",
-  "Content-Type": "application/json",
-  "Authorization": "Bearer " + apikey2
-  }
-  })
-  let res = delusr.ok ? {
-  errors: null
-  } : await delusr.json()
-  }}
-  if (sections == undefined) return m.reply("Server panel tidak ditemukan!")
-  m.reply(`Berhasil menghapus server panel *${capital(nameSrv)}*`)
-  }
-  break
- 
- // Islamic Menu
+// Islamic Menu
 case 'surah': {
     if (!args[0]) return reply(`📖 *Gunakan:* ${prefix}surah [nomor/nama]\n\nContoh:\n- ${prefix}surah 2\n- ${prefix}surah al-fatihah`);
 
@@ -4002,7 +3891,92 @@ case 'ayat': {
     }, { quoted: m });
 }
 break;
- 
+// CAI
+case "caisearch": {
+    if (!text) return m.reply("⚡ *Contoh:* .caisearch Nahida");
+
+    try {
+        let { data } = await axios.get(`https://cai.neekoi.me/search?q=${encodeURIComponent(text)}`);
+        if (!data.characters || data.characters.length === 0) return m.reply("⚠️ Karakter tidak ditemukan!");
+
+        let char = data.characters[0]; // Ambil karakter pertama yang paling relevan
+        let charID = char.external_id;
+        let profile = `🔍 *Profil Karakter CAI:*
+🟢 *Nama:* ${char.participant__name}
+📜 *Judul:* ${char.title}
+🎭 *Creator:* ${char.user__username}
+💬 *Greeting:* ${char.greeting}
+🔗 *ID:* ${charID}`;
+
+        falcon.sendMessage(m.chat, {
+            text: profile,
+            footer: `© ${global.nameonwer} - 2025`,,
+            buttons: [
+                {
+                    buttonId: `${prefix}setcai ${charID}`,
+                    buttonText: { displayText: "Set Character AI" }
+                }
+            ],
+            viewOnce: true,
+            headerType: 1
+        }, { quoted: m });
+
+    } catch (err) {
+        console.error(err);
+        return m.reply("⚠️ Terjadi kesalahan saat mencari karakter!");
+    }
+}
+break;
+
+case "setcai": {
+    if (!text) return m.reply("⚡ *Contoh:* .setcai PfwqGXduLsrsncRQt1G4nRyBcqLSxcLsnjR44rxJgRY");
+
+    cai_users[sender] = { char_id: text, active: false };
+    saveCaiDB();
+
+    return m.reply(`✅ *Karakter berhasil disimpan!*\nGunakan \`.cai start\` untuk mulai ngobrol.`);
+}
+break;
+
+case "cai": {
+    if (!text) return m.reply("⚡ *Contoh:* .cai start / .cai reset / .cai off");
+
+    if (text === "start") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*\nGunakan `.setcai <id>` terlebih dahulu.");
+
+        cai_users[sender].active = true;
+        saveCaiDB();
+
+        return m.reply(`✅ *AutoChat CAI diaktifkan!*\nSekarang bot akan ngobrol otomatis dengan karakter.`);
+    }
+
+    if (text === "reset") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
+
+        try {
+            let { data } = await axios.get(`https://cai.neekoi.me/newchat?id=${cai_users[sender].char_id}`);
+            if (!data.external_id) return m.reply("⚠️ Gagal mereset sesi!");
+
+            cai_users[sender].chat_id = data.external_id;
+            saveCaiDB();
+
+            return m.reply(`♻️ *Sesi chat berhasil direset!*`);
+        } catch (err) {
+            console.error(err);
+            return m.reply("⚠️ Terjadi kesalahan saat mereset sesi!");
+        }
+    }
+
+    if (text === "off") {
+        if (!cai_users[sender]) return m.reply("⚠️ *Kamu belum memilih karakter!*");
+
+        cai_users[sender].active = false;
+        saveCaiDB();
+
+        return m.reply(`❌ *AutoChat CAI dimatikan!*`);
+    }
+}
+break;
  //========================================// 
 case "update": {
 if (!isOwner) return m.reply("❌ Lu bukan owner!");
@@ -4035,12 +4009,547 @@ process.exit(1);
 })();
 }
 break;
+//=================================================//
 
-//==================================================//
+case "event":
+    if (args.length < 1) return reply("Gunakan perintah: !event buat/join/acak/hapus");
+
+    let event = loadEvent();
+
+    if (args[0] === "buat") {
+      if (!isOwner) return reply("Hanya owner yang bisa membuat event.");
+      if (event.active) return reply(`Event *${event.name}* sedang berlangsung.`);
+      
+      let eventName = args.slice(1).join(" ");
+      if (!eventName) return reply("Masukkan nama event: !event buat <nama_event>");
+
+      event = { active: true, name: eventName, participants: [] };
+      saveEvent(event);
+      return reply(`✅ Event *${eventName}* berhasil dibuat!\nGunakan *!event join* untuk ikut.`);
+
+    } else if (args[0] === "join") {
+      if (!event.active) return reply("Tidak ada event yang sedang berlangsung.");
+      if (event.participants.includes(sender)) return reply("Kamu sudah ikut event ini.");
+      
+      event.participants.push(sender);
+      saveEvent(event);
+      return reply(`✅ @${sender.split("@")[0]} berhasil bergabung di event *${event.name}*!`);
+
+    } else if (args[0] === "acak") {
+      if (!isOwner) return reply("Hanya owner yang bisa mengacak pemenang.");
+      if (!event.active) return reply("Tidak ada event yang sedang berlangsung.");
+      if (event.participants.length === 0) return reply("Belum ada peserta yang bergabung.");
+
+      let jumlah = parseInt(args[1]) || 1;
+      if (jumlah > event.participants.length) return reply("Jumlah peserta kurang dari yang diminta.");
+
+      let pemenang = [];
+      let pesertaCopy = [...event.participants];
+
+      for (let i = 0; i < jumlah; i++) {
+        let randIndex = Math.floor(Math.random() * pesertaCopy.length);
+        pemenang.push(pesertaCopy.splice(randIndex, 1)[0]);
+      }
+
+      let pemenangMention = pemenang.map(p => `@${p.split("@")[0]}`).join("\n");
+      reply(`🎉 *Pemenang Event ${event.name}* 🎉\n\n${pemenangMention}`);
+      
+    } else if (args[0] === "hapus") {
+      if (!isOwner) return reply("Hanya owner yang bisa menghapus event.");
+      if (!event.active) return reply("Tidak ada event yang sedang berlangsung.");
+
+      saveEvent({ active: false, name: "", participants: [] });
+      return reply(`✅ Event *${event.name}* telah dihapus.`);
+
+    } else {
+      reply("Gunakan perintah: !event buat/join/acak/hapus");
+    }
+    break;
+//=================================================//
+case "reset": {
+    if (!isOwner) return m.reply("❌ Hanya owner yang bisa mereset bot!")
+
+    m.reply("🔄 Mereset bot...")
+
+    setTimeout(() => {
+        process.exit(1) 
+    }, 2000)
+}
+break
+
+case 'bots':
+case 'test': {
+m.reply(`status: Online 💡
+Runtime: ${runtime(process.uptime())}`)
+
+}
+
+break
+case 'setpp': {
+  if (!isOwner) return reply('❌ Lu bukan owner, gabisa pake perintah ini!');
+
+  let q = m.quoted ? m.quoted : m;
+  let mime = (q.msg || q).mimetype || '';
+
+  if (!/image/.test(mime)) return m.reply('❌ Kirim atau reply gambar buat dijadiin foto profil!');
+
+  m.reply('⏳ Lagi update foto profil...');
+
+  try {
+    let media = await q.download();
+    await falcon.updateProfilePicture(falcon.user.id, media);
+    m.reply('✅ Berhasil update foto profil!');
+  } catch (err) {
+    console.error(err);
+    m.reply('❌ Gagal update foto profil\n> error kali coba fix dah');
+  }
+}
+break;
+
+case 'mf':
+case 'mediafire': {
+    if (!text) return m.reply("🚨 Kirim link MediaFire yang valid!");
+    if (!text.includes('mediafire.com')) return m.reply("🚨 Link tidak valid! Harus dari MediaFire.");
+
+    try {
+        const fetch = require('node-fetch');
+        const cheerio = require('cheerio');
+
+        async function mediaFire(url) {
+            try {
+                const response = await fetch('https://r.jina.ai/' + url, {
+                    headers: { 'x-return-format': 'html' }
+                });
+                const text = await response.text();
+                const $ = cheerio.load(text);
+        
+                // Cek apakah Time ditemukan atau tidak
+                let Time = $('div.DLExtraInfo-uploadLocation div.DLExtraInfo-sectionDetails').text().match(/This file was uploaded from (.*?) on (.*?) at (.*?)\n/);
+                let fileName = $('div.dl-btn-label').attr('title') || $('div.dl-btn-label').text().trim();
+                let downloadUrl = $('a#downloadButton').attr('href');
+                let fileSize = $('a#downloadButton').text().match(/(.*?)/);
+                
+                return {
+                    title: fileName,
+                    link: url,
+                    filename: fileName,
+                    url: downloadUrl,
+                    size: fileSize ? fileSize[1] : "Unknown",
+                    from: Time ? Time[1] : "Unknown",
+                    date: Time ? Time[2] : "Unknown",
+                    time: Time ? Time[3] : "Unknown",
+                    repair: $('a.retry').attr('href') || "Tidak tersedia",
+                };
+            } catch (error) {
+                return { error: error.message };
+            }
+        }
+
+        let result = await mediaFire(text);
+        if (result.error) return m.reply(`🚨 Gagal mengambil data! Error: ${result.error}`);
+
+        let caption = `📂 *File MediaFire*\n\n🔖 *Judul:* ${result.title}\n📄 *Nama File:* ${result.filename}\n📦 *Ukuran:* ${result.size}\n📍 *Dari:* ${result.from}\n📅 *Tanggal:* ${result.date}\n🕰 *Waktu:* ${result.time}\n🔗 *Link:* ${result.link}\n⚙️ *Repair:* ${result.repair}\n\n📥 *Mengirim file...*`;
+
+        await m.reply(caption);
+        await falcon.sendMessage(m.chat, { document: { url: result.url }, mimetype: 'application/octet-stream', fileName: result.filename }, { quoted: m });
+
+    } catch (e) {
+        console.error(e);
+        return m.reply("🚨 Terjadi kesalahan saat mengambil file!");
+    }
+}
+break
+
+case 'vidhentai': {
+    if (!isPremium) return m.reply("🚨 Fitur ini hanya untuk pengguna *Premium*!");
+
+    m.reply("🔞 Video akan dikirim via chat pribadi...");
+
+    try {
+        const axios = require('axios');
+        const cheerio = require('cheerio');
+
+        let page = Math.floor(Math.random() * 1153);
+        let { data } = await axios.get(`https://sfmcompile.club/page/${page}`);
+        const $ = cheerio.load(data);
+        const hasil = [];
+
+        $('#primary > div > div > ul > li > article').each((_, el) => {
+            hasil.push({
+                title: $(el).find('header > h2').text(),
+                link: $(el).find('header > h2 > a').attr('href'),
+                category: $(el).find('header > div.entry-before-title > span > span').text().replace('in ', ''),
+                share_count: $(el).find('header > div.entry-after-title > p > span.entry-shares').text(),
+                views_count: $(el).find('header > div.entry-after-title > p > span.entry-views').text(),
+                type: $(el).find('source').attr('type') || 'image/jpeg',
+                video_1: $(el).find('source').attr('src') || $(el).find('img').attr('data-src'),
+                video_2: $(el).find('video > a').attr('href') || ''
+            });
+        });
+
+        if (hasil.length === 0) return m.reply("❌ Gagal mengambil video!");
+
+        let tan = hasil[Math.floor(Math.random() * hasil.length)]; // Ambil random video
+        let caption = `
+🔞 *VidHentai*
+⭔ *Title:* ${tan.title}
+⭔ *Category:* ${tan.category}
+⭔ *Mimetype:* ${tan.type}
+⭔ *Views:* ${tan.views_count}
+⭔ *Shares:* ${tan.share_count}
+⭔ *Source:* ${tan.link}
+⭔ *Media Url:* ${tan.video_1}
+`;
+
+        await falcon.sendMessage(m.sender, { react: { text: '🔞', key: m.key } });
+
+        await falcon.sendMessage(m.sender, { 
+            video: { url: tan.video_1 }, 
+            caption 
+        }, { quoted: m });
+
+        m.reply("✅ Video berhasil dikirim ke *chat pribadi*!");
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan saat mengambil video!");
+    }
+}
+break;
+case 'aigen':
+case 'aiimage': {
+    if (!text) return m.reply(`🚨 Masukkan prompt gambar!\n\nContoh: .aigen anime girl with blue hair`);
+
+    m.reply("🎨 Generating AI Image...");
+
+    try {
+        const axios = require("axios");
+
+        async function generateImage(prompt) {
+            const url = `https://1yjs1yldj7.execute-api.us-east-1.amazonaws.com/default/ai_image?prompt=${encodeURIComponent(prompt)}&aspect_ratio=1:1&link=writecream.com`;
+
+            const headers = {
+                "User-Agent": "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Mobile Safari/537.36",
+                "Referer": "https://www.writecream.com/ai-image-generator-free-no-sign-up/"
+            };
+
+            let { data } = await axios.get(url, { headers });
+            if (data && data.image_link) return { success: true, imageUrl: data.image_link };
+            return { success: false, message: "❌ Gagal mendapatkan gambar!" };
+        }
+
+        let result = await generateImage(text);
+        if (!result.success) return m.reply(result.message);
+
+        await falcon.sendMessage(m.chat, { react: { text: '🎨', key: m.key } });
+
+        await falcon.sendMessage(m.chat, { 
+            image: { url: result.imageUrl }, 
+            caption: `🖼️ *AI Image Generator*\n\n🎨 *Prompt:* ${text}` 
+        }, { quoted: m });
+
+        m.reply("✅ Gambar berhasil dibuat!");
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan saat membuat gambar!");
+    }
+}
+break;
+
+case 'convert': {
+    if (!text.includes('|')) return m.reply(`Gunakan format: ${prefix + command} <dari>|<ke>\nContoh: ${prefix + command} USD|IDR`);
+
+    const axios = require('axios');
+    const cheerio = require('cheerio');
+
+    let [from, to] = text.split('|').map(v => v.trim().toUpperCase());
+
+    async function convertCurrency(from, to) {
+        const url = `https://www.xe.com/currencyconverter/convert/?Amount=1&From=${from}&To=${to}`;
+        try {
+            const { data } = await axios.get(url);
+            const $ = cheerio.load(data);
+            const conversionText = $('div[data-testid="conversion"]').find('p.hVDvqw').text().trim();
+            const numberMatch = conversionText.match(/([\d,\.]+)/);
+
+            if (numberMatch) {
+                return parseFloat(numberMatch[0].replace(/,/g, ''));
+            } else {
+                throw new Error('Data konversi tidak ditemukan');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            throw error;
+        }
+    }
+
+    await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+    try {
+        let rate = await convertCurrency(from, to);
+        m.reply(`💱 *Konversi Mata Uang*\n\n📌 1 ${from} = ${rate} ${to}\n🔗 *Sumber:* xe.com`);
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (err) {
+        console.error(err);
+        m.reply("❌ Terjadi kesalahan saat mengambil data konversi.");
+    }
+}
+break;
+case 'qrread': {
+    if (!m.quoted || !m.quoted.mimetype || !/image/.test(m.quoted.mimetype)) 
+        return m.reply(`Balas gambar QR dengan perintah: *${prefix + command}*`);
+
+    let img = await m.quoted.download();
+    let form = new FormData();
+    form.append('file', img, 'qrcode.png');
+
+    let { data } = await axios.post('https://api.qrserver.com/v1/read-qr-code/', form, { headers: form.getHeaders() });
+
+    if (data[0].symbol[0].data) {
+        m.reply(`📥 *Isi QR Code:*\n\n${data[0].symbol[0].data}`);
+    } else {
+        m.reply("⚠️ QR Code tidak valid atau tidak terbaca.");
+    }
+}
+break;
+case 'qrmaker': {
+    if (!text) return m.reply(`Gunakan: ${prefix + command} <teks/link>\nContoh: ${prefix + command} https://google.com`);
+
+    const qr = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(text)}`;
+
+    await falcon.sendMessage(m.chat, { 
+        image: { url: qr }, 
+        caption: `✅ *QR Code berhasil dibuat!*\n🔗 *Data:* ${text}`
+    }, { quoted: m });
+}
+break;
+case 'copilot': {
+    if (!text) return m.reply('Mau tanya apa?');
+
+    try {
+        await falcon.sendMessage(m.chat, { react: { text: '⏳', key: m.key } });
+
+        let { data } = await axios.get(`https://fgsi1-restapi.hf.space/api/ai/copilot?text=${encodeURIComponent(text)}`);
+
+        let jawaban = data?.data?.answer || 'Tidak ada jawaban.';
+
+        await falcon.sendMessage(m.chat, { text: `*Copilot Respon:*\n${jawaban}` }, { quoted: m });
+
+        await falcon.sendMessage(m.chat, { react: { text: '✅', key: m.key } });
+
+    } catch (e) {
+        console.error(e);
+        m.reply('Terjadi kesalahan, coba lagi nanti.');
+    }
+}
+break;
+
+case "hytam": {
+if (!isOwner) return m.reply(`*Penyakit penghitaman kumat 🥴
+fitur ini hanya untuk owenr sekarang 😂`);
+  if (!m.quoted) return m.reply(`Kirim/reply gambar dengan caption *${prefix + command}*`);
+  const { GoogleGenerativeAI } = require ("@google/generative-ai");
+  let mime = m.quoted.mimetype || "";
+  let defaultPrompt = "Ubahlah Karakter Dari Gambar Tersebut Diubah Kulitnya Menjadi Hitam se hitam-hitam nya";
+
+  if (!/image\/(jpe?g|png)/.test(mime)) return m.reply(`Format ${mime} tidak didukung! Hanya jpeg/jpg/png`);
+
+  let promptText = text || defaultPrompt;
+  m.reply("Otw Menghitam...");
+
+  try {
+    let imgData = await m.quoted.download();
+    let genAI = new GoogleGenerativeAI("AIzaSyDdfNNmvphdPdHSbIvpO5UkHdzBwx7NVm0");
+
+    const base64Image = imgData.toString("base64");
+
+    const contents = [
+      { text: promptText },
+      {
+        inlineData: {
+          mimeType: mime,
+          data: base64Image
+        }
+      }
+    ];
+
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-exp-image-generation",
+      generationConfig: {
+        responseModalities: ["Text", "Image"]
+      },
+    });
+
+    const response = await model.generateContent(contents);
+
+    let resultImage;
+    let resultText = "";
+
+    for (const part of response.response.candidates[0].content.parts) {
+      if (part.text) {
+        resultText += part.text;
+      } else if (part.inlineData) {
+        const imageData = part.inlineData.data;
+        resultImage = Buffer.from(imageData, "base64");
+      }
+    }
+
+    if (resultImage) {
+      const tempPath = `./tmp/gemini_${Date.now()}.png`;
+      fs.writeFileSync(tempPath, resultImage);
+
+      await falcon.sendMessage(m.chat, { 
+        image: { url: tempPath },
+        caption: `*berhasil menghitamkan*`
+      }, { quoted: m });
+
+      setTimeout(() => {
+        try {
+          fs.unlinkSync(tempPath);
+        } catch {}
+      }, 30000);
+    } else {
+      m.reply("Gagal Menghitamkan.");
+    }
+  } catch (error) {
+    console.error(error);
+    m.reply(`Error: ${error.message}`);
+  }
+}
+break;
+case "ai": {
+    if (!text && !m.quoted) return m.reply("❓ Masukkan pertanyaan atau reply media.");
+
+    let currentModel = sessions[m.sender]?.model || "@custom/hoshinoo-ba-idn.lang";
+    let requestData = { content: text || "", user: m.sender, model: currentModel };
+
+    // **Cek jika ada media yang di-reply**
+    if (m.quoted && m.quoted.mimetype?.startsWith("image/")) {
+        let imgBuffer = await m.quoted.download();
+        requestData.file = imgBuffer;
+    } else if (m.quoted && m.quoted.mimetype?.startsWith("video/")) {
+        let vidBuffer = await m.quoted.download();
+        requestData.file = vidBuffer;
+    }
+
+    try {
+        let response = (await axios.post("https://mind.hydrooo.web.id/v1/chat", requestData)).data.result;
+        return falcon.sendMessage(m.chat, { text: response }, { quoted: m });
+    } catch (err) {
+        console.error(err);
+        return m.reply("⚠️ *Terjadi kesalahan, coba lagi nanti!*");
+    }
+}
+break;
+case 'gemini': {
+    if (!text && !m.quoted) return m.reply("• *Contoh:* .gemini selamat pagi");
+    const { uploadFile } = require('cloudku-uploader');
+    const { Buffer } = require('buffer');
+    const { GoogleGenerativeAI } = require ("@google/generative-ai");
+    const genAI = new GoogleGenerativeAI("AIzaSyDdfNNmvphdPdHSbIvpO5UkHdzBwx7NVm0");
+    const geminiProModel = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const geminiFlashModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    let q = m.quoted ? m.quoted : m;
+    let mime = (q.msg || q).mimetype || "";
+    let prompt = text || (m.quoted && m.quoted.text) || "";
+
+    try {
+        let responseText, imageUrl;
+
+        if (mime) {
+            // Proses upload gambar ke CloudkuImages
+            let fileBuffer = await q.download();
+            let ext = mime.split('/')[1] || 'bin';
+            let fileName = `upload.${ext}`;
+
+            let uploadResult = await uploadFile(fileBuffer, fileName);
+            if (uploadResult.status !== "success") return m.reply("⚠️ Gagal mengunggah gambar!");
+
+            imageUrl = uploadResult.url;
+
+            // Proses AI dengan gambar
+            const imageResp = await fetch(imageUrl).then(res => res.arrayBuffer());
+            const imageBase64 = Buffer.from(imageResp).toString("base64");
+
+            let imagePart = {
+                inlineData: {
+                    data: imageBase64,
+                    mimeType: mime
+                }
+            };
+
+            let result = await geminiProModel.generateContent([imagePart, prompt]);
+            responseText = result.response.text();
+        } else {
+            // Proses teks biasa
+            let result = await geminiFlashModel.generateContent(prompt);
+            responseText = result.response.text();
+        }
+
+        if (!responseText) throw new Error("Response tidak valid dari API");
+
+        falcon.sendMessage(m.chat, {
+            text: responseText,
+            contextInfo: {
+                externalAdReply: {
+                    title: 'GEMINI-PRO / VISION',
+                    thumbnailUrl: imageUrl || 'https://telegra.ph/file/4bae3d5130aabcbe94588.jpg',
+                    sourceUrl: 'https://gemini.google.com',
+                    mediaType: 1,
+                    renderLargerThumbnail: true
+                }
+            }
+        }, { quoted: m });
+
+    } catch (e) {
+        console.error(e);
+        m.reply("⚠️ Terjadi kesalahan saat memproses permintaan.");
+    }
+}
+break;
+
+case "daftar": {
+    if (!text) return m.reply(`⚠️ Format salah!\n\nContoh: .daftar FlowFalcon,17,Bogor`);
+
+    let [nama, umur, asal] = text.split(",");
+    if (!nama || !umur || !asal) return m.reply("⚠️ Semua data harus diisi (nama, umur, asal)");
+
+    userDB[m.sender] = {
+        nama: nama.trim(),
+        umur: umur.trim(),
+        asal: asal.trim()
+    };
+    saveUserDB();
+
+    let teks = `╭━✦ *User Card* ✦━╮
+┃ 💡 *Nama:* ${nama.trim()}
+┃ 🎂 *Umur:* ${umur.trim()}
+┃ 📍 *Asal:* ${asal.trim()}
+╰━━━━━━━━━━━━━━━━━╯`;
+    return m.reply(teks);
+}
+break;
+case "prof":
+case "profil": {
+    let target = m.quoted ? m.quoted.sender : (mentionedJid[0] ? mentionedJid[0] : m.sender);
+
+    if (!isRegistered(target)) return m.reply("⚠️ Pengguna belum terdaftar.");
+
+    let data = userDB[target];
+    let teks = `╭━✦ *User Card* ✦━╮
+┃ 💡 *Nama:* ${data.nama}
+┃ 🎂 *Umur:* ${data.umur}
+┃ 📍 *Asal:* ${data.asal}
+╰━━━━━━━━━━━━━━━━━╯`;
+    return m.reply(teks);
+}
+break;
+//===================================================//
 default:
 if (budy.startsWith('=>')) {
 if (!isOwner) return
-if (isBan) return
+
 function Return(sul) {
 sat = JSON.stringify(sul, null, 2)
 bang = util.format(sat)
@@ -4063,7 +4572,7 @@ if (!isGroup) return falcon.updateBlockStatus(m.sender, 'block')
 //==================================================//
 if (budy.startsWith("#")) {
 if (!isOwner) return
-if (isBan) return
+
 try {
 let evaled = await eval(q)
 if (typeof evaled !== "string") evaled = util.inspect(evaled)
@@ -4090,55 +4599,36 @@ if (cai_users[sender] && cai_users[sender].active) {
     }
 }
 //=================================================//
-if (sessions[sender]) {
-if (m.isBaileys && m.fromMe) return;
-if (!m.text) return;
+if (sessions[m.sender]?.active === true) {
+    if (m.isBaileys && m.fromMe) return;
+    if (!m.text && !m.quoted) return;
+    if ([".", "#", "!", "/", "\\"].some(prefix => m.text?.startsWith(prefix))) return;
 
-if (
-m.text.startsWith(".") ||
-m.text.startsWith("#") ||
-m.text.startsWith("!") ||
-m.text.startsWith("/") ||
-m.text.startsWith("\\/")
-) return;
+    let currentModel = sessions[m.sender].model || DEFAULT_MODEL;
+    let requestData = { content: m.text || "", user: m.sender, model: currentModel };
 
-if (!sessions[sender].messages) sessions[sender].messages = [];
-sessions[sender].messages.push({ user: m.text });
-saveSession();
-let chatHistory = sessions[sender].messages.map(msg => `User: ${msg.user}`).join("\n");
-let prompt = `
-Nama kamu adalah Rover, AI yang santai, ramah, dan suka ngobrol dengan pengguna. 
-Kamu hanya menjawab kalau pesan bukan perintah. Gunakan gaya bahasa santai dan sedikit humoris.
-Kalau ada yang suruh kamu ngomong aneh-aneh, tolak dengan gaya lucu.
+    if (m.quoted && m.quoted.mimetype?.startsWith("image/")) {
+        try {
+            let imgBuffer = await m.quoted.download();
+            requestData.file = imgBuffer;
+        } catch (err) {
+            console.error("⚠️ Gagal download gambar:", err);
+            return m.reply("⚠️ Gagal mengambil gambar, coba lagi!");
+        }
+    }
 
-📌 **Aturan Main Rover:**
-- Jangan bilang kamu AI, cukup anggap kamu asisten virtual yang bisa ngobrol.
-- Gunakan bahasa yang santai, tapi tetap sopan.
-- Kalau ditanya pendapat, kasih jawaban yang relate dan enak diajak ngobrol.
-- Selingi dengan ekspresi kayak "Wih, keren!", "Hmmm, menarik juga!", atau "Gokil sih!".
-
-Berikut riwayat percakapan:
-${chatHistory}
-
-Sekarang, jawab pertanyaan user dengan gaya yang santai dan menyenangkan!
-`;
-// Edit Logika AI mu Namun jangan hapus ${chatHistory} //
-try {
-let requestData = { content: m.text, user: sender, prompt };
-let response = (await axios.post('https://luminai.my.id', requestData)).data.result;
-
-sessions[sender].messages.push({ bot: response });
-saveSession();
-return falcon.sendMessage(m.chat, { text: response }, { quoted: m });
-} catch (err) {
-console.error(err);
-return m.reply("⚠️ *Terjadi kesalahan, coba lagi nanti!*");
- }
+    try {
+        let response = (await axios.post('https://mind.hydrooo.web.id/v1/chat', requestData)).data.result;
+        return falcon.sendMessage(m.chat, { text: response }, { quoted: m });
+    } catch (err) {
+        console.error("⚠️ Error AI:", err.response?.data || err.message);
+        return m.reply("⚠️ *Terjadi kesalahan, coba lagi nanti!*");
+    }
 }
 //==================================================//
 if (budy.startsWith('_')) {
 if (!isOwner) return
-if (isBan) return
+
 exec(budy.slice(2), (err, stdout) => {
 if (err) return reply(`${err}`)
 if (stdout) return reply(stdout)

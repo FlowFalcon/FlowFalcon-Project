@@ -3,10 +3,10 @@ const chalk = require('chalk')
 //=================================================//
 // setting bot
 global.namaowner = "FlowFalcon"
-global.ownernumber = "6287740310396"
 global.namabot = "Falcon"
-global.packname = "dibuat oleh FlowFalcon"
-global.author = "6287740310396"
+global.ownernumber = "6285123366391"
+global.packname = "My stiker"
+global.author = "FlowFalcon"
 global.idSaluran = "120363329290204598@newsletter"
 global.anticall = false
 global.autotyping = false
@@ -19,6 +19,7 @@ global.images = [
 "https://img86.pixhost.to/images/588/564679710_media.jpg",
 "https://img86.pixhost.to/images/588/564679716_media.jpg"
 ]
+
 // Settings Api Panel Pterodactyl
 global.egg = "15" // Egg ID
 global.nestid = "5" // nest ID
@@ -29,10 +30,6 @@ global.loc = "1" // Location ID
 global.domain = "https://"
 global.apikey = "" //ptla 1
 global.capikey = "" //ptlc 1
-// Server 2
-global.domain2 = "https://"
-global.apikey2 = "" //ptla 2
-global.capikey2 = "" //ptlc 2
 
 // Message Command 
 global.mess = {

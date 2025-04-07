@@ -63,7 +63,6 @@ global.idSaluran = "120363329290204598@newsletter"
 - `kick @user` - Kick member  
 - `hidetag <pesan>` - Mention semua  
 - `setwelcome` - Atur welcome message  
-- `setjadwal <kota>` - Set jadwal sholat  
 
 ### 🎨 **Stiker Menu**  
 - `brat <teks>` - Buat stiker text  

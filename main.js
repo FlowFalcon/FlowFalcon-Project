@@ -144,17 +144,17 @@ if (!falcon.authState.creds.registered) {
     console.clear();
 say(`💠 Welcome to FlowFalcon~Project 💠
 ===========================================
-   🔹 Script     : FlowFalcon~Project  
+   🔹 Script     : FlowFalcon-Project  
    🔹 Developer  : FlowFalcon  
-   🔹 Version    : 3.5  
-   🔹 Type       : Free  
+   🔹 Version    : 3.7.5  
+   🔹 Type       : case (cjs)  
 ===========================================
 📌 Silakan login dengan akun yang terdaftar  
 📌 Jika belum memiliki akun, silakan daftar  
    melalui grup WhatsApp kami terlebih dahulu.  
 
-🔗 Group Chat : flowfalcon.xyz/group/  
-🔗 Channel    : flowfalcon.xyz/channel/  
+🔗 Group Registrasi:
+https://chat.whatsapp.com/KGuEU9CMSQT6po4gPsTIjH
 
 ===========================================\n`, {
   font: 'console',
@@ -306,10 +306,10 @@ if (update.connection == "open" || update.receivedPendingNotifications == "true"
 console.clear()
 say(`💠 Welcome to FlowFalcon~Project 💠
 ===========================================
-   🔹 Script     : FlowFalcon~Project  
+   🔹 Script     : FlowFalcon-Project  
    🔹 Developer  : FlowFalcon  
-   🔹 Version    : 3.5  
-   🔹 Type       : Free  
+   🔹 Version    : 3.7.5  
+   🔹 Type       : case (cjs)  
 ===========================================
 📌 Nantikan Informasi Update Script Terbaru
    Di Grup & Channel WhatsApp Kami.
@@ -402,129 +402,9 @@ console.log(err)
 }
 })
 //=================================================//
-async function getJadwalSholat(cityId) {
-    try {
-        let date = moment().format("YYYY-MM-DD");
-        let { data } = await axios.get(`https://rest.cloudkuimages.com/api/muslim/jadwalsholat?cityId=${cityId}&date=${date}`);
-
-        if (data.status !== 200 || !data.result) return null;
-        
-        return {
-            lokasi: data.result.lokasi,
-            daerah: data.result.daerah,
-            jadwal: data.result.jadwal
-        };
-    } catch (err) {
-        console.error("❌ Error mengambil jadwal sholat:", err);
-        return null;
-    }
-}
-
-const zoneMapping = {
-    "jakarta": "Asia/Jakarta",
-    "bandung": "Asia/Jakarta",
-    "surabaya": "Asia/Jakarta",
-    "yogyakarta": "Asia/Jakarta",
-    "makassar": "Asia/Makassar",
-    "denpasar": "Asia/Makassar",
-    "manado": "Asia/Makassar",
-    "papua": "Asia/Jayapura",
-    "ambon": "Asia/Jayapura",
-    "jayapura": "Asia/Jayapura",
-};
-
-//=================================================//
-let lastSentTime = {};
-
-setInterval(async () => {
-    let config = loadConfig();
-    let nowUTC = moment().utc();
-
-    for (let groupId in config) {
-        let grup = config[groupId];
-
-        if (grup.jadwalSholat?.aktif) {
-            let cityId = grup.jadwalSholat?.cityId.toLowerCase();
-            let hasilJadwal = await getJadwalSholat(cityId);
-            if (!hasilJadwal) continue;
-
-            let { lokasi, daerah, jadwal } = hasilJadwal;
-            let timezone = zoneMapping[cityId] || "Asia/Jakarta";
-            let now = moment().tz(timezone);
-            let jamSekarang = now.format("HH:mm");
-
-            let isPuasa = grup.jadwalPuasa?.aktif;
-
-            let pesanSholat = {
-                imsak: isPuasa
-                    ? "⏱️ *Waktu Imsak Telah Tiba!* ⏱️\nJangan lupa sahur dan baca niat puasanya ya! 😊"
-                    : "⏱️ *Waktu Imsak Telah Tiba!* ⏱️\nBuat yang gak puasa, boleh lanjut tidur. 😴",
-
-                subuh: isPuasa
-                    ? "🌙 *Waktu Subuh Telah Tiba!* 🌙\nSahur telah selesai! Jangan lupa niat puasa dan sholat subuh ya. 😊"
-                    : "🌙 *Waktu Subuh Telah Tiba!* 🌙\nBangunlah dan mulai harimu dengan sholat subuh yang berkah! Jangan lupa dzikir pagi ya! 😊",
-
-                dzuhur: isPuasa
-                    ? "☀️ *Waktu Dzuhur Telah Tiba!* ☀️\nTetap semangat berpuasa! Jangan lupa sholat dzuhur untuk menambah keberkahan. 🤲"
-                    : "☀️ *Waktu Dzuhur Telah Tiba!* ☀️\nSaatnya istirahat sejenak dan mendekatkan diri kepada Allah dengan sholat dzuhur.",
-
-                ashar: isPuasa
-                    ? "🌤️ *Waktu Ashar Telah Tiba!* 🌤️\nHampir maghrib! Tetap semangat dan jangan lupa sholat ashar. 😊"
-                    : "🌤️ *Waktu Ashar Telah Tiba!* 🌤️\nJangan lupa untuk sholat ashar! Semoga harimu penuh keberkahan. 😊",
-
-                maghrib: isPuasa
-                    ? "🌆 *Waktu Maghrib Telah Tiba!* 🌆\nAlhamdulillah! Saatnya berbuka puasa, jangan lupa doa sebelum makan. 🍽️"
-                    : "🌆 *Waktu Maghrib Telah Tiba!* 🌆\nSaatnya sholat maghrib! Jangan lupa berdoa sebelum makan. 🍽️",
-
-                isya: isPuasa
-                    ? "🌌 *Waktu Isya & Tarawih Telah Tiba!* 🌌\nJangan lupa sholat isya dan lanjutkan dengan tarawih ya! Semoga Allah memberkahi kita semua. 🤲"
-                    : "🌌 *Waktu Isya Telah Tiba!* 🌌\nJangan lupa sholat isya dan istirahat yang cukup! 😊"
-            };
-
-            for (let waktu in pesanSholat) {
-                if (jadwal[waktu] && jamSekarang === jadwal[waktu] && lastSentTime[groupId] !== jamSekarang) {
-                    lastSentTime[groupId] = jamSekarang; // Cegah spam
-                    let pesan = pesanSholat[waktu];
-                    let imageUrl = "https://img5.pixhost.to/images/3023/569226926_flowfalcon-media.jpg";
-
-                    console.log(`✅ Mengirim pengingat ${waktu} ke grup: ${groupId}`);
-
-                    await falcon.sendMessage(groupId, {
-                        text: `${pesan}\n\n📍 Lokasi: *${lokasi}, ${daerah}*`,
-                        contextInfo: {
-                            externalAdReply: {
-                                title: `🕌 ${waktu.charAt(0).toUpperCase() + waktu.slice(1)} Telah Tiba!`,
-                                body: `UNTUK WILAYAH ${lokasi} DAN SEKITARNYA`,
-                                mediaType: 1,
-                                thumbnailUrl: imageUrl,
-                                renderLargerThumbnail: true,
-                                sourceUrl: ""
-                            }
-                        }
-                    });
-
-                    if (isPuasa && waktu !== "imsak") {
-                        let delay = (Math.floor(Math.random() * 2) + 1) * 60 * 1000; // Jeda 1-2 menit
-                        setTimeout(async () => {
-                            console.log(`🔒 Menutup grup ${groupId} setelah ${waktu}`);
-
-                            await falcon.groupSettingUpdate(groupId, "announcement"); // Tutup grup
-                            await falcon.sendMessage(groupId, { text: `🔒 *Grup dikunci selama 10 menit setelah ${waktu}!*` });
-
-                            setTimeout(async () => {
-                                console.log(`🔓 Membuka kembali grup ${groupId}`);
-                                await falcon.groupSettingUpdate(groupId, "not_announcement"); // Buka grup
-                                await falcon.sendMessage(groupId, { text: "🔓 *Grup sudah dibuka kembali!* Jangan lupa ibadahnya! 🤲" });
-                            }, 10 * 60 * 1000); // 10 menit
-                        }, delay);
-                    }
-                }
-            }
-        }
-    }
-}, 60000);
-//=================================================//
-
+/*
+Fitur sholat sementara ku hapus dulu untuk penyesuaian
+*/
 //=================================================//
 falcon.ev.on('call', async (user) => {
 if (!anticall) return
