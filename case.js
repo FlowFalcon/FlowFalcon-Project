@@ -876,7 +876,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: menu,
-footer: `© ${global.nameonwer} - 2025`,,
+footer: `© ${global.nameonwer} - 2025`,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -886,7 +886,7 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: `© ${global.nameonwer} - 2025`,,
+title: `© ${global.nameonwer} - 2025`,
 body: "Asistent Virtual"
 },
 },
@@ -906,7 +906,7 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: `© ${global.nameonwer} - 2025`,,
+title: `© ${global.nameonwer} - 2025`,
 highlight_label: "FlowFalcon",
 rows: [{
 title: "allmenu",
@@ -1083,7 +1083,7 @@ fileLength: 99999999999999,
 pageCount: 99999999999999,
 mimetype: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 caption: allmenu,
-footer: `© ${global.nameonwer} - 2025`,,
+footer: `© ${global.nameonwer} - 2025`,
 buttons: buttons,
 headerType: 1,
 contextInfo: {
@@ -1093,7 +1093,7 @@ mediaType: 1,
 renderLargerThumbnail: true,
 showAdAttribution: true,
 thumbnailUrl: falconimg,
-title: `© ${global.nameonwer} - 2025`,,
+title: `© ${global.nameonwer} - 2025`,
 body: "FlowFalcon Project"
 },
 },
@@ -1113,7 +1113,7 @@ name: 'single_select',
 paramsJson: JSON.stringify({
 title: "list",
 sections: [{
-title: `© ${global.nameonwer} - 2025`,,
+title: `© ${global.nameonwer} - 2025`,
 highlight_label: "FlowFalcon",
 rows: [{
 title: "menu",
@@ -1161,7 +1161,7 @@ _Gausah malu untuk join karena Isi member-nya ramah-ramah loh_
 
 sudah deh itu aja yang mau aku sampaikan silahkan gunakan fitur kami dengan bijak yah 😉 
 `,
-footer: `© ${global.nameonwer} - 2025`,,
+footer: `© ${global.nameonwer} - 2025`,
 buttons: [
 {
 buttonId: `${prefix}allmenu`,
@@ -2547,7 +2547,7 @@ image: await fetchBuffer(img)
 } else if (isSlide == false) {
 falcon.sendMessage(m.chat, {
 text: "Silahkan pilih sesuai keinginan Anda",
-footer: `© ${global.nameonwer} - 2025`,,
+footer: `© ${global.nameonwer} - 2025`,
 buttons: [
 {
 buttonId: `${prefix}tiktokmp4 ${text}`,
@@ -3910,7 +3910,7 @@ case "caisearch": {
 
         falcon.sendMessage(m.chat, {
             text: profile,
-            footer: `© ${global.nameonwer} - 2025`,,
+            footer: `© ${global.nameonwer} - 2025`,
             buttons: [
                 {
                     buttonId: `${prefix}setcai ${charID}`,
